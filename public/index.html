@@ -98,11 +98,11 @@
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal { background: rgba(30, 30, 30, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); width: 360px; padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 60px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.active .modal { transform: scale(1); }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; }
+        .input-group { margin-bottom: 15px; width: 100%; }
+        .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; text-align: left; }
         .input-field { width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; }
         .input-field:focus { border-color: var(--accent-color); background: rgba(0, 0, 0, 0.4); }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; width: 100%; }
         .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-cancel { background: rgba(255, 255, 255, 0.1); color: #ccc; }
         .btn-cancel:hover { background: rgba(255, 255, 255, 0.2); color: white; }
@@ -112,7 +112,7 @@
         .user-list th, .user-list td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-role-select { background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px; }
 
-        /* === 修复 1：获取按钮样式 === */
+        /* === 修复获取按钮样式 === */
         .url-input-wrapper { display: flex; gap: 8px; }
         .btn-get { 
             padding: 0 15px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); 
@@ -122,8 +122,8 @@
         }
         .btn-get:hover { background: var(--accent-color); color: white; }
 
-        /* 登录动画相关 */
-        .login-anim-view, .loading-anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; }
+        /* === 动画系统样式 (含新增的 loading-anim-view) === */
+        .login-anim-view, .loading-anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; width: 100%; }
         
         .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         .status-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -236,7 +236,7 @@
     </div>
 
     <div class="modal-overlay" id="loadingModalOverlay">
-        <div class="modal" style="min-height: 150px; display:flex; align-items:center; justify-content:center;">
+        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center;">
                 <div id="globalLoader" class="spinner"></div>
                 <div id="globalSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
@@ -290,6 +290,7 @@
             bilibili: { name: 'Bilibili', url: 'https://search.bilibili.com/all?keyword=', icon: 'https://www.bilibili.com/favicon.ico' }
         };
         const placeholderIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
+        
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
         let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
@@ -305,7 +306,7 @@
         function triggerSearch() { const val = document.getElementById('searchInput').value; if(val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
         function handleSearch(e) { if(e.key === 'Enter') triggerSearch(); }
 
-        // === 2. 动画辅助函数 ===
+        // === 动画函数 ===
         function showGlobalLoading(text) {
             const overlay = document.getElementById('loadingModalOverlay');
             document.getElementById('globalLoader').style.display = 'block';
@@ -379,7 +380,6 @@
             }
         }
 
-        // === 登录逻辑 (带动画) ===
         async function handleLogin() {
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
@@ -499,7 +499,6 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
-        // === 3. 获取/保存 (带通用动画) ===
         async function fetchSiteInfo() { 
             const url=document.getElementById('siteUrl').value; if(!url)return; 
             showGlobalLoading('正在获取信息...');
@@ -517,16 +516,15 @@
             const payload={title:document.getElementById('siteTitle').value, url:document.getElementById('siteUrl').value, desc:document.getElementById('siteDesc').value, icon:document.getElementById('siteIcon').value, category:document.getElementById('siteCategory').value||'默认分类'}; 
             if(!payload.title||!payload.url)return alert('必填'); 
             
-            // 关闭编辑框，显示加载动画
-            closeModal('modalOverlay');
+            closeModal('modalOverlay'); 
             showGlobalLoading('正在保存...');
             
             try {
                 if(isEditing) await fetch(`/api/sites/${editId}`,{method:'PUT',body:JSON.stringify(payload)}); 
                 else await fetch('/api/sites',{method:'POST',body:JSON.stringify(payload)}); 
-                showGlobalResult(true, '保存成功', loadSites); // 成功后刷新
+                showGlobalResult(true, '保存成功', loadSites); 
             } catch (e) {
-                showGlobalResult(false, '保存失败', () => document.getElementById('modalOverlay').classList.add('active')); // 失败后重新打开编辑
+                showGlobalResult(false, '保存失败', () => document.getElementById('modalOverlay').classList.add('active')); 
             }
         }
         
