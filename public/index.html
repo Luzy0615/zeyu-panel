@@ -103,7 +103,7 @@
         .input-field { width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; }
         .input-field:focus { border-color: var(--accent-color); background: rgba(0, 0, 0, 0.4); }
         .url-input-wrapper { display: flex; gap: 8px; width: 100%; }
-        .btn-get { padding: 0 12px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); border: 1px solid rgba(10, 132, 255, 0.3); border-radius: 10px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: 0.2s; height: 42px; display: flex; align-items: center; justify-content: center; }
+        .btn-get { padding: 0 15px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); border: 1px solid rgba(10, 132, 255, 0.3); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; transition: 0.2s; height: 42px; display: flex; align-items: center; justify-content: center; }
         .btn-get:hover { background: var(--accent-color); color: white; }
         .btn-get:disabled { opacity: 0.5; cursor: wait; }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; width: 100%; }
@@ -270,7 +270,13 @@
             <div class="input-group"><label>链接</label><div class="url-input-wrapper"><input type="text" class="input-field" id="siteUrl" placeholder="https://example.com"><button class="btn-get" id="btnGetInfo" onclick="fetchSiteInfo()">获取</button></div></div>
             <div class="input-group"><label>标题</label><input type="text" class="input-field" id="siteTitle" placeholder="例如: 必应"></div>
             <div class="input-group"><label>描述</label><input type="text" class="input-field" id="siteDesc" placeholder="简短描述"></div>
-            <div class="input-group"><label>图标</label><input type="text" class="input-field" id="siteIcon" placeholder="留空自动获取"></div>
+            <div class="input-group"><label>图标</label>
+                <div class="url-input-wrapper">
+                    <input type="text" class="input-field" id="siteIcon" placeholder="留空自动获取">
+                    <input type="file" id="iconUploadInput" accept="image/*" style="display:none" onchange="handleIconUpload(event)">
+                    <button class="btn-get" onclick="document.getElementById('iconUploadInput').click()">上传</button>
+                </div>
+            </div>
             <div class="modal-btns"><button class="btn btn-cancel" onclick="closeModal('modalOverlay')">取消</button><button class="btn btn-save" onclick="saveSite()">保存</button></div>
         </div>
     </div>
@@ -517,6 +523,19 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
+        // === 图片上传处理 ===
+        function handleIconUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 200 * 1024) return showMsg('图片过大 (需小于200KB)');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('siteIcon').value = e.target.result;
+                showMsg('图标已加载');
+            };
+            reader.readAsDataURL(file);
+        }
+
         // === 获取信息 (带动画) ===
         async function fetchSiteInfo() { 
             const url = document.getElementById('siteUrl').value;
