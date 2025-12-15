@@ -121,18 +121,13 @@
         .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
 
-        /* === 按钮组 (新布局) === */
+        /* 按钮组 */
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .fab-btn:hover { transform: scale(1.1); }
-        #addBtn { display: none; }
-        
-        .fab-btn.secondary { 
-            width: 48px; height: 48px; 
-            background: rgba(50, 50, 50, 0.4); backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.2); 
-        }
+        .fab-btn.secondary { width: 48px; height: 48px; background: rgba(50, 50, 50, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
         .fab-btn.secondary.active { background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        #addBtn { display: none; } /* 默认隐藏 */
 
         .context-menu { 
             position: fixed; z-index: 1000; width: 160px; 
@@ -167,6 +162,7 @@
         .btn-save { background: var(--accent-color); color: white; }
         .btn-move { flex: 0.5; background: rgba(255, 255, 255, 0.15); font-size: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; }
 
+        /* 用户列表表格 */
         .user-list { width: 100%; border-collapse: collapse; margin-bottom: 20px; color: #eee; font-size: 13px; }
         .user-list th, .user-list td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-role-select { background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px; }
@@ -234,7 +230,7 @@
     </div>
 
     <div class="fab-container">
-        <button class="fab-btn secondary" onclick="openSettings()" id="settingsBtn">
+        <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
         <button class="fab-btn secondary" onclick="openUserMenu()" id="userBtn">
@@ -263,30 +259,19 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="settingsModalOverlay">
-        <div class="modal">
-            <h3 style="color:white; margin-bottom:20px; text-align:center;">内容管理</h3>
-            <div id="adminPanel" style="display:none;">
-                <div class="modal-btns" style="margin-bottom:20px;">
-                    <button class="btn btn-move" onclick="toggleEditMode()">📝 切换编辑模式</button>
-                </div>
-                <h4 style="color:#ddd; margin-bottom:10px;">用户权限管理</h4>
-                <div id="userListContainer">Loading users...</div>
-            </div>
-            <div id="guestPanel" style="text-align:center; color:#ccc; margin-bottom:20px;">
-                访客模式：无权修改设置
-            </div>
-            <div class="modal-btns"><button class="btn btn-cancel" onclick="closeModal('settingsModalOverlay')">关闭</button></div>
-        </div>
-    </div>
-
     <div class="modal-overlay" id="userProfileModalOverlay">
         <div class="modal">
-            <h3 style="color:white; margin-bottom:20px; text-align:center;">当前账户</h3>
-            <p style="text-align:center; color:#fff; font-size:1.2rem; margin-bottom:20px;" id="currentUsernameDisplay">Admin</p>
+            <h3 style="color:white; margin-bottom:15px; text-align:center;">用户中心</h3>
+            <p style="text-align:center; color:#ccc; font-size:1rem; margin-bottom:20px;" id="currentUsernameDisplay">Admin</p>
+            
+            <div id="adminManagerContainer" style="display:none; margin-bottom:20px;">
+                <h4 style="color:#ddd; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">权限管理</h4>
+                <div id="userListContainer">Loading...</div>
+            </div>
+
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('userProfileModalOverlay')">返回</button>
-                <button class="btn btn-save" style="background:#FF453A" onclick="handleLogout()">注销 / 切换</button>
+                <button class="btn btn-save" style="background:#FF453A" onclick="handleLogout()">退出登录</button>
             </div>
         </div>
     </div>
@@ -294,11 +279,11 @@
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <h3 id="modalTitle" style="color:white; margin-bottom:20px; text-align:center;">添加网站</h3>
-            <div class="input-group"><label>分类</label><input type="text" class="input-field" id="siteCategory" list="catList"> <datalist id="catList"></datalist></div>
-            <div class="input-group"><label>链接</label><div class="url-input-wrapper"><input type="text" class="input-field" id="siteUrl"><button class="btn-get" id="btnGetInfo" onclick="fetchSiteInfo()">获取</button></div></div>
-            <div class="input-group"><label>标题</label><input type="text" class="input-field" id="siteTitle"></div>
-            <div class="input-group"><label>描述</label><input type="text" class="input-field" id="siteDesc"></div>
-            <div class="input-group"><label>图标</label><input type="text" class="input-field" id="siteIcon"></div>
+            <div class="input-group"><label>分类</label><input type="text" class="input-field" id="siteCategory" list="catList" placeholder="输入或选择分类"> <datalist id="catList"></datalist></div>
+            <div class="input-group"><label>链接</label><div class="url-input-wrapper"><input type="text" class="input-field" id="siteUrl" placeholder="https://example.com"><button class="btn-get" id="btnGetInfo" onclick="fetchSiteInfo()">获取</button></div></div>
+            <div class="input-group"><label>标题</label><input type="text" class="input-field" id="siteTitle" placeholder="例如: 必应"></div>
+            <div class="input-group"><label>描述</label><input type="text" class="input-field" id="siteDesc" placeholder="简短描述"></div>
+            <div class="input-group"><label>图标</label><input type="text" class="input-field" id="siteIcon" placeholder="留空自动获取"></div>
             <div class="modal-btns"><button class="btn btn-cancel" onclick="closeModal('modalOverlay')">取消</button><button class="btn btn-save" onclick="saveSite()">保存</button></div>
         </div>
     </div>
@@ -313,14 +298,6 @@
     </div>
 
     <script>
-        // === 1. 核心状态 ===
-        let currentUserRole = 'guest'; 
-        let sites = [];
-        let existingCategories = new Set();
-        let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
-        let isManageMode = false;
-
-        // === 2. 引擎逻辑 ===
         const engines = {
             bing: { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico' },
             google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
@@ -328,13 +305,17 @@
             bilibili: { name: 'Bilibili', url: 'https://search.bilibili.com/all?keyword=', icon: 'https://www.bilibili.com/favicon.ico' }
         };
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
+        let isManageMode = false;
+        let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
+        let currentUserRole = 'guest';
+
         function initEngine() { document.getElementById('currentEngineIcon').src = engines[currentEngine].icon; }
         function toggleEngineMenu(e) { e.stopPropagation(); document.getElementById('engineDropdown').classList.toggle('show'); }
         function changeEngine(key) { currentEngine = key; localStorage.setItem('myEngine', key); initEngine(); }
         function triggerSearch() { const val = document.getElementById('searchInput').value; if(val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
         function handleSearch(e) { if(e.key === 'Enter') triggerSearch(); }
 
-        // === 3. 认证与用户菜单逻辑 ===
+        // === 认证逻辑 ===
         async function checkAuth() {
             try {
                 const res = await fetch('/api/auth');
@@ -348,57 +329,40 @@
             const isAdmin = currentUserRole === 'admin';
             document.getElementById('addBtn').style.display = isAdmin ? 'flex' : 'none';
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
-            if(!isAdmin && isManageMode) toggleEditMode();
+            if(!isAdmin && isManageMode) toggleEditMode(); // 权限丢失则退出编辑模式
         }
 
-        // 点击用户按钮 (人形)
+        // === 逻辑变更：齿轮按钮仅负责切换编辑模式 ===
+        function toggleEditMode() {
+            if(currentUserRole !== 'admin') return alert('需要管理员权限');
+            isManageMode = !isManageMode;
+            document.body.classList.toggle('manage-mode', isManageMode);
+            document.getElementById('manageBtn').classList.toggle('active', isManageMode);
+            renderGrid();
+        }
+
+        // === 逻辑变更：用户按钮负责登录/注销/权限管理 ===
         function openUserMenu() {
             if (currentUserRole === 'guest') {
-                // 访客 -> 显示登录框
                 document.getElementById('loginModalOverlay').classList.add('active');
             } else {
-                // 已登录 -> 显示注销/信息框
-                document.getElementById('currentUsernameDisplay').innerText = currentUserRole === 'admin' ? 'Admin (管理员)' : 'User';
+                // 已登录，显示用户信息弹窗
+                document.getElementById('currentUsernameDisplay').innerText = `当前用户: ${currentUserRole === 'admin' ? '管理员' : '普通用户'}`;
                 document.getElementById('userProfileModalOverlay').classList.add('active');
-            }
-        }
-
-        async function handleLogin() {
-            const username = document.getElementById('loginUser').value;
-            const password = document.getElementById('loginPass').value;
-            try {
-                const res = await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ username, password }) });
-                if(res.ok) {
-                    closeModal('loginModalOverlay');
-                    checkAuth();
-                    alert('登录成功');
-                } else { alert('账号或密码错误'); }
-            } catch(e) { alert('登录失败'); }
-        }
-
-        async function handleLogout() {
-            await fetch('/api/auth', { method: 'DELETE' });
-            closeModal('userProfileModalOverlay');
-            checkAuth();
-            alert('已退出，切换为访客');
-        }
-
-        // === 4. 设置/管理面板 (齿轮) ===
-        function openSettings() {
-            document.getElementById('settingsModalOverlay').classList.add('active');
-            if(currentUserRole === 'admin') {
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('guestPanel').style.display = 'none';
-                loadUserList(); // 只有点齿轮才加载用户列表
-            } else {
-                document.getElementById('adminPanel').style.display = 'none';
-                document.getElementById('guestPanel').style.display = 'block';
+                
+                // 如果是管理员，加载权限管理列表
+                if (currentUserRole === 'admin') {
+                    document.getElementById('adminManagerContainer').style.display = 'block';
+                    loadUserList();
+                } else {
+                    document.getElementById('adminManagerContainer').style.display = 'none';
+                }
             }
         }
 
         async function loadUserList() {
             const container = document.getElementById('userListContainer');
-            container.innerHTML = 'Loading...';
+            container.innerHTML = 'Loading users...';
             try {
                 const res = await fetch('/api/users');
                 const users = await res.json();
@@ -417,7 +381,7 @@
                 });
                 html += `</table>`;
                 container.innerHTML = html;
-            } catch(e) { container.innerText = '加载失败 (可能无权限)'; }
+            } catch(e) { container.innerText = '加载失败 (无权限)'; }
         }
 
         async function updateUserRole(id) {
@@ -426,12 +390,29 @@
             alert('权限已更新');
         }
 
-        // === 5. 常规逻辑 ===
-        async function loadSites() {
-            const res = await fetch('/api/sites');
-            sites = await res.json();
-            renderGrid();
+        async function handleLogin() {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            try {
+                const res = await fetch('/api/auth', { method: 'POST', body: JSON.stringify({ username:u, password:p }) });
+                if(res.ok) {
+                    closeModal('loginModalOverlay');
+                    checkAuth();
+                    alert('登录成功');
+                } else { alert('账号或密码错误'); }
+            } catch(e) { alert('登录失败'); }
         }
+
+        async function handleLogout() {
+            await fetch('/api/auth', { method: 'DELETE' });
+            closeModal('userProfileModalOverlay');
+            checkAuth();
+            alert('已退出');
+        }
+
+        // === 常规逻辑 ===
+        let sites = [];
+        async function loadSites() { const res = await fetch('/api/sites'); sites = await res.json(); renderGrid(); }
 
         function renderGrid() {
             const container = document.getElementById('cardGrid'); container.innerHTML = '';
@@ -472,15 +453,6 @@
                 section.appendChild(grid); container.appendChild(section);
             }
             setTimeout(() => { document.querySelectorAll('.card-desc').forEach(desc => { const span = desc.querySelector('span'); if (span && span.offsetWidth > desc.offsetWidth) { desc.classList.add('scrolling'); const dist = span.offsetWidth - desc.offsetWidth + 10; span.style.setProperty('--scroll-dist', `-${dist}px`); span.style.animationDuration = `${2 + dist/20}s`; } }); }, 100);
-        }
-
-        function toggleEditMode() {
-            if(currentUserRole !== 'admin') return alert('需要管理员权限');
-            isManageMode = !isManageMode;
-            document.body.classList.toggle('manage-mode', isManageMode);
-            document.getElementById('manageBtn').classList.toggle('active', isManageMode); // 齿轮高亮
-            closeModal('settingsModalOverlay');
-            renderGrid();
         }
 
         let contextTargetIndex = -1;
