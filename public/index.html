@@ -35,8 +35,7 @@
         /* 头部 */
         .header-container { 
             display: flex; flex-direction: row; align-items: center; justify-content: center; 
-            margin-bottom: 5px; /* 减小标题与副标题的间距 */
-            animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            margin-bottom: 10px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .site-title { 
             font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; 
@@ -46,24 +45,16 @@
             width: 3px; height: 42px; background-color: rgba(255, 255, 255, 0.6); 
             margin: 0 25px; border-radius: 2px; 
         }
-        
-        /* === 修改 1：时间字体改小 === */
         .clock { 
-            font-size: 2.6rem; /* 从 3.5rem 缩小到 2.6rem */
-            font-weight: 800; line-height: 1; 
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; 
-            margin-top: -2px; /* 微调对齐 */
+            font-size: 3.5rem; font-weight: 800; line-height: 1; 
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-top: -4px;
         }
 
-        /* === 修改 2：Hello World 间距缩小 === */
-        .subtitle-container { 
-            text-align: center; 
-            margin-bottom: 35px; /* 从 45px 减小到 35px */
-            animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; 
-        }
+        /* 副标题 */
+        .subtitle-container { text-align: center; margin-bottom: 45px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
         .subtitle-text {
             display: inline-block; font-size: 1.3rem; color: rgba(255, 255, 255, 0.95);
-            background: transparent; border: none;
+            background: transparent; backdrop-filter: none; border: none;
             text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px;
             font-family: "PingFang SC", sans-serif;
         }
@@ -83,8 +74,18 @@
         .engine-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
         .search-input { flex: 1; background: transparent; border: none; padding: 16px 15px; font-size: 16px; color: white; outline: none; }
         .search-input::placeholder { color: rgba(255, 255, 255, 0.7); }
-        .search-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.8); padding: 12px 18px; cursor: pointer; display: flex; transition: 0.2s; }
+        
+        /* === 修复 4：搜索按钮完美居中 === */
+        .search-btn { 
+            background: transparent; border: none; color: rgba(255, 255, 255, 0.8); 
+            padding: 0 18px; /* 移除上下 padding，只保留左右 */
+            height: 100%; /* 撑满高度 */
+            cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; /* Flex 居中 */
+            transition: 0.2s; 
+        }
         .search-btn:hover { color: var(--accent-color); transform: scale(1.1); }
+        
         .engine-dropdown { position: absolute; top: 115%; left: 0; width: 160px; background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 16px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .engine-dropdown.show { display: flex; animation: menuPop 0.2s ease-out; }
         .engine-option { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
@@ -93,20 +94,17 @@
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
         
-        /* === 修改 3：编辑分类按钮改为玻璃主题 === */
+        /* === 修复 1：编辑分类按钮增加背景模糊 === */
         .cat-edit-btn { 
-            background: rgba(255, 255, 255, 0.1); /* 玻璃背景 */
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(5px); /* 增加磨砂效果 */
+            -webkit-backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.2); 
             padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #eee; 
             font-weight: 500; cursor: pointer; display: none; margin-right: 10px; 
             transition: all 0.2s; 
         }
-        .cat-edit-btn:hover { 
-            background: rgba(255, 255, 255, 0.25); /* 悬停变亮 */
-            color: white; 
-            transform: scale(1.05); 
-        }
+        .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -140,12 +138,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.7); 
             display: none; flex-direction: column; padding: 6px; animation: menuPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
         }
-        /* === 修改 4：右键菜单字体缩小 === */
-        .context-item { 
-            padding: 10px; border-radius: 8px; cursor: pointer; 
-            font-size: 12.5px; /* 从 14px 缩小到 12.5px */
-            color: #fff; display: flex; align-items: center; gap: 8px; transition: background 0.1s; 
-        }
+        .context-item { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: #fff; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
         .context-item:hover { background: var(--accent-color); }
         .context-item.delete:hover { background: #FF453A; }
 
@@ -157,7 +150,6 @@
             box-shadow: 0 25px 60px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
         .modal-overlay.active .modal { transform: scale(1); }
-        
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; }
         .input-field { width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; }
@@ -179,24 +171,28 @@
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
         @media (max-width: 600px) { 
-            .header-container { flex-direction: column; gap: 5px; margin-bottom: 20px; }
+            /* === 修复 2：手机端头部间距极窄 === */
+            .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; } /* 设为 1px */
             .separator { display: none; }
             .site-title { font-size: 2.5rem; margin-top: 0; }
-            /* 手机端时间也对应缩小 */
             .clock { font-size: 2rem; margin-top: 0; }
+            
             .search-container { max-width: 88%; margin-bottom: 25px; }
             .search-wrapper { border-radius: 30px; padding-right: 4px; min-height: 44px; }
             .search-input { padding: 10px 12px; font-size: 14px; height: 44px; line-height: 44px; }
             .engine-select { padding: 8px 12px; }
             .engine-icon { width: 20px; height: 20px; }
-            .search-btn { padding: 8px 14px; height: 44px; }
+            /* 手机端按钮 */
+            .search-btn { padding: 0 14px; height: 44px; } /* 去掉上下padding，靠flex居中 */
+            
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .glass-card { padding: 10px 10px; flex-direction: row; align-items: center; }
             .card-icon { width: 36px; height: 36px; margin-right: 10px; }
             .card-title { font-size: 14px !important; margin-bottom: 2px; }
             .card-desc { font-size: 11px !important; opacity: 0.8; }
             .modal { width: 90%; }
-            .category-title { font-size: 1.1rem; margin-top: 25px; }
+            /* === 修复 3：手机端分类标题字号调整 === */
+            .category-title { font-size: 1rem; margin-top: 25px; } /* 设为 1rem */
         }
     </style>
 </head>
