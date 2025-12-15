@@ -41,7 +41,7 @@
         .clock { font-size: 2.6rem; font-weight: 800; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-top: -2px; }
 
         .subtitle-container { text-align: center; margin-bottom: 35px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
-        .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; font-family: "PingFang SC", sans-serif; }
+        .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; font-family: "PingFang SC", sans-serif; cursor: pointer; }
 
         /* 搜索栏 */
         .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
@@ -102,10 +102,6 @@
         .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; }
         .input-field { width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; }
         .input-field:focus { border-color: var(--accent-color); background: rgba(0, 0, 0, 0.4); }
-        .url-input-wrapper { display: flex; gap: 8px; }
-        .btn-get { padding: 0 12px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); border: 1px solid rgba(10, 132, 255, 0.3); border-radius: 10px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: 0.2s; }
-        .btn-get:hover { background: var(--accent-color); color: white; }
-        .btn-get:disabled { opacity: 0.5; cursor: wait; }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
         .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-cancel { background: rgba(255, 255, 255, 0.1); color: #ccc; }
@@ -131,6 +127,12 @@
         @keyframes cardEntrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
+
+        /* V37原版样式 */
+        .url-input-wrapper { display: flex; gap: 8px; }
+        .btn-get { padding: 0 12px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); border: 1px solid rgba(10, 132, 255, 0.3); border-radius: 10px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: 0.2s; }
+        .btn-get:hover { background: var(--accent-color); color: white; }
+        .btn-get:disabled { opacity: 0.5; cursor: wait; }
 
         @media (max-width: 600px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
@@ -209,7 +211,7 @@
 
     <div class="modal-overlay" id="loginModalOverlay">
         <div class="modal">
-            <div class="login-form-view" id="loginFormView" style="width:100%">
+            <div class="login-form-view" id="loginFormView">
                 <h3 style="color:white; margin-bottom:20px; text-align:center;">用户登录</h3>
                 <div class="input-group"><label>用户名</label><input type="text" class="input-field" id="loginUser"></div>
                 <div class="input-group"><label>密码</label><input type="password" class="input-field" id="loginPass"></div>
@@ -264,39 +266,28 @@
     </div>
 
     <script>
+        // === 1. 核心状态 ===
+        let currentUserRole = 'guest'; 
+        let sites = [];
+        let existingCategories = new Set();
+        let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
+        let isManageMode = false;
+
+        // === 2. 引擎逻辑 ===
         const engines = {
             bing: { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico' },
             google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
             baidu: { name: '百度', url: 'https://www.baidu.com/s?wd=', icon: 'https://www.baidu.com/favicon.ico' },
             bilibili: { name: 'Bilibili', url: 'https://search.bilibili.com/all?keyword=', icon: 'https://www.bilibili.com/favicon.ico' }
         };
-        const placeholderIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
-        
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
-        let isManageMode = false;
-        let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
-        let currentUserRole = 'guest';
-        let sites = [];
-        let existingCategories = new Set();
-        let contextTargetIndex = -1;
-        let isEditing = false, editId = -1;
-
         function initEngine() { document.getElementById('currentEngineIcon').src = engines[currentEngine].icon; }
         function toggleEngineMenu(e) { e.stopPropagation(); document.getElementById('engineDropdown').classList.toggle('show'); }
         function changeEngine(key) { currentEngine = key; localStorage.setItem('myEngine', key); initEngine(); }
         function triggerSearch() { const val = document.getElementById('searchInput').value; if(val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
         function handleSearch(e) { if(e.key === 'Enter') triggerSearch(); }
 
-        async function loadSites() {
-            try {
-                const res = await fetch('/api/sites');
-                if(!res.ok) throw new Error('API Error');
-                sites = await res.json();
-                if(!Array.isArray(sites)) sites = [];
-                renderGrid();
-            } catch(e) { console.error('Sites load error', e); }
-        }
-
+        // === 3. 认证与用户菜单逻辑 ===
         async function checkAuth() {
             try {
                 const res = await fetch('/api/auth');
@@ -313,14 +304,7 @@
             if(!isAdmin && isManageMode) toggleEditMode();
         }
 
-        function toggleEditMode() {
-            if(currentUserRole !== 'admin') return alert('需要管理员权限');
-            isManageMode = !isManageMode;
-            document.body.classList.toggle('manage-mode', isManageMode);
-            document.getElementById('manageBtn').classList.toggle('active', isManageMode);
-            renderGrid();
-        }
-
+        // 点击用户按钮 (人形)
         function openUserMenu() {
             if (currentUserRole === 'guest') {
                 // 重置登录弹窗状态
@@ -341,38 +325,59 @@
             }
         }
 
+        // === 登录逻辑 (带动画) ===
         async function handleLogin() {
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
             if(!u || !p) return alert("请输入账号密码");
 
+            // 1. 切换到动画视图
             document.getElementById('loginFormView').style.display = 'none';
             document.getElementById('loginAnimView').style.display = 'flex';
+            
+            // 重置动画元素状态
             document.getElementById('loginLoader').style.display = 'block';
             document.getElementById('loginSuccess').style.display = 'none';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginStatusText').innerText = '正在验证...';
 
+            // 2. 强制等待 2 秒 (Promise.all)
             const waitTime = new Promise(resolve => setTimeout(resolve, 2000));
             const loginReq = fetch('/api/auth', { method: 'POST', body: JSON.stringify({ username:u, password:p }) });
 
             try {
                 const [_, res] = await Promise.all([waitTime, loginReq]);
+                
+                // 3. 处理结果
                 document.getElementById('loginLoader').style.display = 'none';
+                
                 if(res.ok) {
+                    // 成功
                     document.getElementById('loginSuccess').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '登录成功';
-                    setTimeout(() => { closeModal('loginModalOverlay'); checkAuth(); }, 1000);
+                    // 延迟 1秒 关闭
+                    setTimeout(() => {
+                        closeModal('loginModalOverlay');
+                        checkAuth();
+                    }, 1000);
                 } else {
+                    // 失败
                     document.getElementById('loginError').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '账号或密码错误';
-                    setTimeout(() => { document.getElementById('loginAnimView').style.display = 'none'; document.getElementById('loginFormView').style.display = 'block'; }, 1500);
+                    // 延迟 1.5秒 切回表单
+                    setTimeout(() => {
+                        document.getElementById('loginAnimView').style.display = 'none';
+                        document.getElementById('loginFormView').style.display = 'block';
+                    }, 1500);
                 }
             } catch(e) {
                 document.getElementById('loginLoader').style.display = 'none';
                 document.getElementById('loginError').style.display = 'flex';
                 document.getElementById('loginStatusText').innerText = '网络错误';
-                setTimeout(() => { document.getElementById('loginAnimView').style.display = 'none'; document.getElementById('loginFormView').style.display = 'block'; }, 1500);
+                setTimeout(() => {
+                    document.getElementById('loginAnimView').style.display = 'none';
+                    document.getElementById('loginFormView').style.display = 'block';
+                }, 1500);
             }
         }
 
@@ -383,6 +388,7 @@
             alert('已退出');
         }
 
+        // === 用户管理 (Admin Only) ===
         async function loadUserList() {
             const container = document.getElementById('userListContainer');
             container.innerHTML = 'Loading users...';
@@ -391,7 +397,16 @@
                 const users = await res.json();
                 let html = `<table class="user-list"><tr><th>用户</th><th>角色</th><th>操作</th></tr>`;
                 users.forEach(u => {
-                    html += `<tr><td>${u.username}</td><td><select class="user-role-select" id="role-${u.id}"><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option><option value="guest" ${u.role==='guest'?'selected':''}>Guest</option></select></td><td><button onclick="updateUserRole(${u.id})">💾</button></td></tr>`;
+                    html += `<tr>
+                        <td>${u.username}</td>
+                        <td>
+                            <select class="user-role-select" id="role-${u.id}">
+                                <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
+                                <option value="guest" ${u.role==='guest'?'selected':''}>Guest</option>
+                            </select>
+                        </td>
+                        <td><button onclick="updateUserRole(${u.id})">💾</button></td>
+                    </tr>`;
                 });
                 html += `</table>`;
                 container.innerHTML = html;
@@ -402,6 +417,13 @@
             const newRole = document.getElementById(`role-${id}`).value;
             await fetch('/api/users', { method: 'PUT', body: JSON.stringify({ id, newRole }) });
             alert('权限已更新');
+        }
+
+        // === 5. 常规逻辑 ===
+        async function loadSites() {
+            const res = await fetch('/api/sites');
+            sites = await res.json();
+            renderGrid();
         }
 
         function renderGrid() {
@@ -445,6 +467,14 @@
             setTimeout(() => { document.querySelectorAll('.card-desc').forEach(desc => { const span = desc.querySelector('span'); if (span && span.offsetWidth > desc.offsetWidth) { desc.classList.add('scrolling'); const dist = span.offsetWidth - desc.offsetWidth + 10; span.style.setProperty('--scroll-dist', `-${dist}px`); span.style.animationDuration = `${2 + dist/20}s`; } }); }, 100);
         }
 
+        function toggleEditMode() {
+            if(currentUserRole !== 'admin') return alert('需要管理员权限');
+            isManageMode = !isManageMode;
+            document.body.classList.toggle('manage-mode', isManageMode);
+            document.getElementById('manageBtn').classList.toggle('active', isManageMode); // 齿轮高亮
+            renderGrid();
+        }
+
         let contextTargetIndex = -1;
         function showContextMenu(e, index) { e.preventDefault(); contextTargetIndex = index; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; let x = e.clientX, y = e.clientY; if (x + 160 > window.innerWidth) x -= 160; menu.style.left = `${x}px`; menu.style.top = `${y}px`; }
         document.addEventListener('click', () => { document.getElementById('contextMenu').style.display = 'none'; document.getElementById('engineDropdown').classList.remove('show'); });
@@ -466,12 +496,8 @@
         async function saveCategory() { const o=document.getElementById('editOldCatName').value, n=document.getElementById('editCatName').value; if(o!==n && n) { await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); const i=categoryOrder.indexOf(o); if(i!==-1)categoryOrder[i]=n; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); } closeModal('catModalOverlay'); loadSites(); }
         function moveCategory(dir) { const n=document.getElementById('editOldCatName').value, i=categoryOrder.indexOf(n); if(i===-1)return; if(dir==='up'&&i>0)[categoryOrder[i],categoryOrder[i-1]]=[categoryOrder[i-1],categoryOrder[i]]; else if(dir==='down'&&i<categoryOrder.length-1)[categoryOrder[i],categoryOrder[i+1]]=[categoryOrder[i+1],categoryOrder[i]]; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); renderGrid(); }
         function updateTime() { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); const w=['日','一','二','三','四','五','六']; document.getElementById('dateDisplay').innerText = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} 星期${w[now.getDay()]}`; }
-        
-        // 启动
-        initEngine();
-        loadSites(); // 立即加载内容
-        checkAuth(); // 后台检查权限
-        setInterval(updateTime, 1000); updateTime();
+        initEngine(); checkAuth().then(loadSites); setInterval(updateTime, 1000); updateTime();
+        const placeholderIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
     </script>
 </body>
 </html>
