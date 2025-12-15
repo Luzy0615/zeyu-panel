@@ -35,7 +35,8 @@
         /* 头部 */
         .header-container { 
             display: flex; flex-direction: row; align-items: center; justify-content: center; 
-            margin-bottom: 10px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            margin-bottom: 5px; /* 减小标题与副标题的间距 */
+            animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .site-title { 
             font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; 
@@ -45,16 +46,24 @@
             width: 3px; height: 42px; background-color: rgba(255, 255, 255, 0.6); 
             margin: 0 25px; border-radius: 2px; 
         }
+        
+        /* === 修改 1：时间字体改小 === */
         .clock { 
-            font-size: 3.5rem; font-weight: 800; line-height: 1; 
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-top: -4px;
+            font-size: 2.6rem; /* 从 3.5rem 缩小到 2.6rem */
+            font-weight: 800; line-height: 1; 
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; 
+            margin-top: -2px; /* 微调对齐 */
         }
 
-        /* 副标题 */
-        .subtitle-container { text-align: center; margin-bottom: 45px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
+        /* === 修改 2：Hello World 间距缩小 === */
+        .subtitle-container { 
+            text-align: center; 
+            margin-bottom: 35px; /* 从 45px 减小到 35px */
+            animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; 
+        }
         .subtitle-text {
             display: inline-block; font-size: 1.3rem; color: rgba(255, 255, 255, 0.95);
-            background: transparent; backdrop-filter: none; border: none;
+            background: transparent; border: none;
             text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px;
             font-family: "PingFang SC", sans-serif;
         }
@@ -83,9 +92,21 @@
 
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
-        .cat-edit-btn { background: var(--accent-color); border: 1px solid rgba(255,255,255,0.3); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: white; font-weight: 600; cursor: pointer; display: none; margin-right: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s; }
-        .cat-edit-btn:hover { transform: scale(1.05); background: #2993ff; }
-        .cat-edit-btn:active { transform: scale(0.95); }
+        
+        /* === 修改 3：编辑分类按钮改为玻璃主题 === */
+        .cat-edit-btn { 
+            background: rgba(255, 255, 255, 0.1); /* 玻璃背景 */
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2); 
+            padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #eee; 
+            font-weight: 500; cursor: pointer; display: none; margin-right: 10px; 
+            transition: all 0.2s; 
+        }
+        .cat-edit-btn:hover { 
+            background: rgba(255, 255, 255, 0.25); /* 悬停变亮 */
+            color: white; 
+            transform: scale(1.05); 
+        }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -110,41 +131,30 @@
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .fab-btn:hover { transform: scale(1.1); }
-        
-        /* === 修复 2：齿轮按钮透明度降低 === */
-        .fab-btn.secondary { 
-            width: 48px; height: 48px; 
-            background: rgba(50, 50, 50, 0.4); /* 透明度从 0.8 降到 0.4 */
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.2); 
-        }
+        .fab-btn.secondary { width: 48px; height: 48px; background: rgba(50, 50, 50, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
         .fab-btn.secondary.active { background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
 
-        /* === 修复 1：右键菜单玻璃化 === */
         .context-menu { 
             position: fixed; z-index: 1000; width: 150px; 
-            background: rgba(30, 30, 30, 0.6); /* 玻璃背景 */
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15); /* 玻璃边框 */
-            border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.7); 
-            display: none; flex-direction: column; padding: 6px; 
-            animation: menuPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.7); 
+            display: none; flex-direction: column; padding: 6px; animation: menuPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
         }
-        .context-item { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
+        /* === 修改 4：右键菜单字体缩小 === */
+        .context-item { 
+            padding: 10px; border-radius: 8px; cursor: pointer; 
+            font-size: 12.5px; /* 从 14px 缩小到 12.5px */
+            color: #fff; display: flex; align-items: center; gap: 8px; transition: background 0.1s; 
+        }
         .context-item:hover { background: var(--accent-color); }
         .context-item.delete:hover { background: #FF453A; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        /* === 修复 3：弹窗透明度再次降低 === */
         .modal { 
-            background: rgba(30, 30, 30, 0.25); /* 透明度从 0.4 降到 0.25 */
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            width: 360px; padding: 25px; border-radius: 24px; 
-            border: 1px solid rgba(255, 255, 255, 0.15); 
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5); 
-            transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            background: rgba(30, 30, 30, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            width: 360px; padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
         .modal-overlay.active .modal { transform: scale(1); }
         
@@ -172,7 +182,8 @@
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 20px; }
             .separator { display: none; }
             .site-title { font-size: 2.5rem; margin-top: 0; }
-            .clock { font-size: 2.5rem; margin-top: 0; }
+            /* 手机端时间也对应缩小 */
+            .clock { font-size: 2rem; margin-top: 0; }
             .search-container { max-width: 88%; margin-bottom: 25px; }
             .search-wrapper { border-radius: 30px; padding-right: 4px; min-height: 44px; }
             .search-input { padding: 10px 12px; font-size: 14px; height: 44px; line-height: 44px; }
@@ -436,7 +447,6 @@
         function showContextMenu(e, index) { e.preventDefault(); contextTargetIndex = index; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; let x = e.clientX, y = e.clientY; if (x + 150 > window.innerWidth) x = window.innerWidth - 150; menu.style.left = `${x}px`; menu.style.top = `${y}px`; }
         function hideContextMenu() { document.getElementById('contextMenu').style.display = 'none'; }
         
-        /* === 新增：处理右键新标签页打开 === */
         function handleMenuOpenNewTab() {
             if (contextTargetIndex > -1) {
                 const url = sites[contextTargetIndex].url;
