@@ -32,14 +32,15 @@
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 12vh; z-index: 1; }
 
-        /* === 修复 4：头部绝对垂直居中 === */
+        /* === 修复：头部绝对视觉居中 (Optical Alignment) === */
         .header-container { 
             display: flex; 
-            align-items: center; /* 关键：让左中右三部分垂直居中 */
-            justify-content: center; 
+            align-items: center; /* 垂直方向居中对齐 */
+            justify-content: center; /* 水平方向居中对齐 */
             margin-bottom: 50px; 
             animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            height: 70px; /* 给定固定高度，方便居中计算 */
+            /* 去掉固定高度，让内容撑开，避免对齐计算错误 */
+            padding: 10px 0; 
         }
         
         .site-title { 
@@ -49,27 +50,28 @@
             letter-spacing: -1px; 
             text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
             line-height: 1; 
-            display: flex; align-items: center; 
-            margin: 0;
+            display: flex; 
+            align-items: center; 
+            /* 视觉微调：大号字体通常会有底部留白，微调抵消 */
+            transform: translateY(-2px); 
         }
         
         .separator { 
             width: 3px; 
-            height: 46px; /* 稍微加高，匹配视觉重心 */
+            height: 48px; /* 调整高度以匹配两侧视觉重心 */
             background-color: rgba(255, 255, 255, 0.5); 
             margin: 0 25px; 
             border-radius: 2px; 
-            /* 确保分隔符本身没有偏移 */
-            transform: translateY(1px); 
         }
         
         .time-block { 
             display: flex; 
             flex-direction: column; 
-            justify-content: center; /* 内容在块内垂直居中 */
-            height: 100%;
-            /* 消除可能的默认间距 */
-            margin: 0; padding: 0;
+            justify-content: center; 
+            /* 使用 gap 代替 margin，确保间距均匀 */
+            gap: 4px; 
+            /* 视觉光学补偿：时间块整体微调，对齐左侧大标题的中轴线 */
+            transform: translateY(1px); 
         }
         
         .clock { 
@@ -78,7 +80,7 @@
             line-height: 1; 
             text-shadow: 0 2px 8px rgba(0,0,0,0.5); 
             font-variant-numeric: tabular-nums; 
-            margin-bottom: 5px; /* 时间和日期的小间距 */
+            margin: 0; /* 清除所有 margin */
         }
         
         .date { 
@@ -87,11 +89,11 @@
             font-weight: 400; 
             text-shadow: 0 1px 3px rgba(0,0,0,0.5); 
             line-height: 1;
+            margin: 0; /* 清除所有 margin */
         }
 
         .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
         
-        /* === 修复 2：搜索框动画回归 === */
         .search-wrapper { 
             display: flex; align-items: center; 
             background: rgba(0, 0, 0, 0.3); 
@@ -100,12 +102,10 @@
             border-radius: 35px; 
             padding-right: 5px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.2); 
-            /* 强制启用过渡动画 */
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-            transform: translateZ(0); /* 开启硬件加速 */
+            transform: translateZ(0); 
         }
 
-        /* 悬停动画 */
         .search-wrapper:hover { 
             transform: translateY(-3px) scale(1.01); 
             background: rgba(0, 0, 0, 0.5); 
@@ -183,17 +183,16 @@
 
         .card-desc span { display: inline-block; }
 
-        /* === 修复 1：滚动文字立即开始，无延迟 === */
         .card-desc.scrolling span {
-            animation: scroll-left linear infinite; /* 去掉 alternate，改为单向循环或保持来回 */
-            animation-delay: 0s; /* 立即开始 */
+            animation: scroll-left linear infinite; 
+            animation-delay: 0s; 
         }
 
         @keyframes scroll-left {
             0% { transform: translateX(0); }
-            50% { transform: translateX(var(--scroll-dist)); } /* 滚过去 */
-            55% { transform: translateX(var(--scroll-dist)); } /* 稍微停顿一下 */
-            100% { transform: translateX(0); } /* 滚回来 */
+            50% { transform: translateX(var(--scroll-dist)); } 
+            55% { transform: translateX(var(--scroll-dist)); } 
+            100% { transform: translateX(0); } 
         }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
@@ -230,18 +229,18 @@
         @keyframes cardEntrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-        /* === 修复 3：手机端搜索框样式优化 (变小) === */
         @media (max-width: 600px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 30px; height: auto; }
             .separator { display: none; }
             .site-title { font-size: 2.2rem; }
             
-            /* 手机端搜索框专用样式 */
+            /* 手机端搜索框专用样式 (瘦身版) */
             .search-container { max-width: 90%; margin-bottom: 30px; }
-            .search-wrapper { border-radius: 30px; }
-            .search-input { padding: 12px 10px; font-size: 14px; } /* 缩小内边距和字体 */
-            .engine-select { padding: 10px 12px; }
+            .search-wrapper { border-radius: 30px; padding-right: 4px; }
+            .search-input { padding: 10px 12px; font-size: 14px; } 
+            .engine-select { padding: 8px 12px; }
             .engine-icon { width: 20px; height: 20px; }
+            .search-btn { padding: 8px 14px; }
             
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .glass-card { padding: 12px 10px; flex-direction: row; align-items: center; }
