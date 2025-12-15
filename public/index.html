@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zeyu Panel</title>
-    <link rel="icon" href="/logo.jpg" type="image/jpeg">
+    <link rel="icon" href="logo.jpg">
     <style>
         :root { 
             --glass-bg: rgba(0, 0, 0, 0.25); 
@@ -69,6 +69,9 @@
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
+        /* === 需求1：修复手机端布局 ===
+           PC端保持自适应，手机端强制双列
+        */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         
         /* 卡片样式 */
@@ -157,8 +160,10 @@
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
 
-        /* 需求1：修复手机端卡片尺寸适配问题 */
-        @media (max-width: 600px) { 
+        /* === 需求1：修复手机端布局 ===
+           使用 !important 强制覆盖，确保即使内容很少也是双列
+        */
+        @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
             .site-title { font-size: 2.5rem; margin-top: 0; }
@@ -170,9 +175,12 @@
             .engine-icon { width: 20px; height: 20px; }
             .search-btn { padding: 0 14px; height: 44px; }
             
-            /* 强制双列布局，紧凑间距 */
-            .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .glass-card { padding: 10px; }
+            /* 强制双列布局，紧凑间距，防止单列 */
+            .grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+                gap: 10px; 
+            }
+            .glass-card { padding: 10px; min-width: 0; }
             .card-icon { width: 32px; height: 32px; margin-right: 8px; }
             .card-title { font-size: 13px !important; margin-bottom: 2px; }
             .card-desc { font-size: 11px !important; opacity: 0.8; }
@@ -338,8 +346,8 @@
         let contextTargetIndex = -1;
         let isEditing = false, editId = -1;
         let draggedItem = null;
-        let layoutChanged = false; // 需求2：标记布局变动
-        let originalSortOrder = []; // 需求2：用于撤销
+        let layoutChanged = false; // 标记布局变动
+        let originalSortOrder = []; // 用于撤销
 
         // === 2. 基础功能 ===
         function initEngine() { document.getElementById('currentEngineIcon').src = engines[currentEngine].icon; }
@@ -365,7 +373,7 @@
             document.getElementById('msgCancelBtn').onclick = () => {
                 closeModal('msgModalOverlay');
                 if (onCancel) onCancel();
-            }
+            };
             document.getElementById('msgModalOverlay').classList.add('active');
         }
 
@@ -452,8 +460,6 @@
             if (draggedItem.category !== targetCategory) {
                 const oldCat = draggedItem.category;
                 draggedItem.category = targetCategory;
-                // 注意：跨分类移动不立即调用 API，等到退出编辑模式统一保存（或者是单独的 API 调用）
-                // 现有的逻辑是跨分类直接调 API，我们保持这个，因为它涉及数据结构改变
                 try {
                     await fetch(`/api/sites/${draggedItem.id}`, {
                         method: 'PUT',
@@ -481,17 +487,12 @@
             
             siteSortOrder = newOrder;
             localStorage.setItem('siteSortOrder', JSON.stringify(siteSortOrder));
-            
-            // 需求2：在 Drop 时，调用保存到数据库的逻辑 (如果需要实时保存位置)
-            // 这里我们先存到 LocalStorage，在退出编辑模式时询问是否保存到 DB
         }
 
         // === 需求2：保存排序到数据库的函数 (需后端支持) ===
         async function saveSortOrderToRemote(orderArray) {
             try {
-                // 这里调用后端接口保存顺序
-                // 假设后端有一个 /api/sites/sort 接口
-                // 如果你还没有这个接口，这个请求会 404，但不影响前端运行
+                // 调用后端接口保存顺序
                 await fetch('/api/sites/sort', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -582,7 +583,6 @@
             renderGrid();
         }
 
-        // ... (User/Login functions remain same) ...
         function openUserMenu() {
             if (currentUserRole === 'guest') {
                 document.getElementById('loginFormView').style.display = 'block';
