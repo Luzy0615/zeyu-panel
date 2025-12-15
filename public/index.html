@@ -16,9 +16,7 @@
             --font-stack: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         
-        /* === 修复 1：强制重置字体缩放 === */
         html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-stack); -webkit-font-smoothing: antialiased; }
         
         body { 
@@ -73,23 +71,10 @@
         .engine-option { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
-        /* 分类布局 */
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; }
-        .category-title { 
-            font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; 
-            border-left: 4px solid var(--accent-color); 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; 
-            display: flex; align-items: center; justify-content: space-between;
-        }
-
-        /* === 修复 2：分类管理按钮 === */
-        .cat-edit-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            padding: 4px 10px; border-radius: 8px; font-size: 12px; color: #ddd;
-            cursor: pointer; display: none; margin-right: 10px;
-        }
+        .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
+        .cat-edit-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; font-size: 12px; color: #ddd; cursor: pointer; display: none; margin-right: 10px; }
         .cat-edit-btn:hover { background: var(--accent-color); border-color: var(--accent-color); color: white; }
-        /* 当进入管理模式时显示 */
         body.manage-mode .cat-edit-btn { display: inline-block; animation: popIn 0.3s; }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
@@ -105,8 +90,6 @@
         }
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
-        
-        /* 抖动动画 */
         .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); cursor: alias; }
         @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(1deg); } 75% { transform: rotate(-1deg); } 100% { transform: rotate(0deg); } }
 
@@ -115,26 +98,41 @@
         
         .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
         
-        /* === 修复 1：强制统一字体大小，防止被浏览器放大 === */
+        /* === 修复点 1：标题不滚动，超出显示省略号 === */
         .card-title { 
-            font-size: 15px !important; /* 强制 */
+            font-size: 15px !important; 
             font-weight: 600; margin-bottom: 4px; color: #fff; 
             line-height: 1.4;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; /* 静态省略号 */
         }
+
+        /* === 修复点 2：描述文字自动滚动 (呼吸式) === */
         .card-desc { 
-            font-size: 12px !important; /* 强制 */
+            font-size: 12px !important; 
             color: rgba(255,255,255,0.7); font-weight: 400; 
             line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* 滚动文字 */
-        @keyframes scrollText { 0% { transform: translateX(0); } 50% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
-        .text-scroll-wrapper { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; }
-        .glass-card:hover .text-scroll-wrapper { text-overflow: unset; overflow: visible; }
-        .text-scroll-wrapper span { display: inline-block; transition: transform 3s ease-in-out; }
-        .glass-card:hover .text-scroll-wrapper span { transform: translateX(-30px); }
+        .card-desc span {
+            display: inline-block;
+        }
 
-        /* 按钮组 */
+        /* 只有带有 scrolling 类的才会滚动 */
+        .card-desc.scrolling span {
+            animation: scroll-left linear infinite alternate;
+        }
+
+        /* 滚动动画：停顿 -> 向左 -> 停顿 -> 向右 */
+        @keyframes scroll-left {
+            0%, 15% { transform: translateX(0); }
+            85%, 100% { transform: translateX(var(--scroll-dist)); }
+        }
+
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .fab-btn:hover { transform: scale(1.1); }
@@ -146,7 +144,6 @@
         .context-item:hover { background: var(--accent-color); }
         .context-item.delete:hover { background: #FF453A; }
 
-        /* 弹窗 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal { background: #252525; width: 360px; padding: 25px; border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: 0 25px 80px rgba(0,0,0,0.8); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -163,7 +160,6 @@
         .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-cancel { background: #444; color: #ccc; }
         .btn-save { background: var(--accent-color); color: white; }
-        /* 排序按钮 */
         .btn-move { flex: 0.5; background: #555; font-size: 16px; }
 
         @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
@@ -178,7 +174,6 @@
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .glass-card { padding: 12px 10px; flex-direction: row; align-items: center; }
             .card-icon { width: 38px; height: 38px; margin-right: 10px; }
-            /* 强制手机端字体 */
             .card-title { font-size: 14px !important; margin-bottom: 2px; }
             .card-desc { font-size: 11px !important; opacity: 0.8; }
             .modal { width: 90%; }
@@ -291,7 +286,6 @@
         };
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
-        // 存储分类顺序配置
         let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
 
         function initEngine() {
@@ -333,23 +327,15 @@
                 const opt = document.createElement('option'); opt.value = cat; catList.appendChild(opt);
             });
 
-            // === 核心逻辑：结合 LocalStorage 排序 ===
-            // 1. 获取所有存在的分类
             let keys = Object.keys(grouped);
-            
-            // 2. 按照 LocalStorage 里的顺序排序
             keys.sort((a, b) => {
                 let indexA = categoryOrder.indexOf(a);
                 let indexB = categoryOrder.indexOf(b);
-                // 如果是新分类（不在记录里），放到最后
                 if (indexA === -1) indexA = 9999;
                 if (indexB === -1) indexB = 9999;
                 return indexA - indexB;
             });
-
-            // 3. 更新 LocalStorage，确保新分类也被记录
             if (JSON.stringify(keys) !== JSON.stringify(categoryOrder)) {
-                 // 合并新旧，去重
                  const newOrder = [...new Set([...categoryOrder, ...keys])].filter(k => existingCategories.has(k));
                  categoryOrder = newOrder;
                  localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
@@ -359,12 +345,8 @@
                 const items = grouped[category];
                 const section = document.createElement('div'); section.className = 'category-section';
                 
-                // === 修复 2：分类标题增加编辑按钮 ===
                 const title = document.createElement('div'); title.className = 'category-title'; 
-                title.innerHTML = `
-                    <span>${category}</span>
-                    <button class="cat-edit-btn" onclick="openCatModal('${category}')">编辑分类</button>
-                `;
+                title.innerHTML = `<span>${category}</span><button class="cat-edit-btn" onclick="openCatModal('${category}')">编辑分类</button>`;
                 section.appendChild(title);
 
                 const grid = document.createElement('div'); grid.className = 'grid';
@@ -372,22 +354,18 @@
                 items.forEach((site) => {
                     const card = document.createElement('div'); 
                     card.className = `glass-card ${isManageMode ? 'shake' : ''}`;
-                    card.onclick = () => {
-                        if (isManageMode) {
-                            openModal(true, site);
-                        } else {
-                            window.location.href = site.url;
-                        }
-                    };
+                    card.onclick = () => { isManageMode ? openModal(true, site) : window.location.href = site.url; };
                     const originalIndex = sites.findIndex(s => s.id === site.id);
                     card.oncontextmenu = (e) => showContextMenu(e, originalIndex);
                     
                     const iconHtml = site.icon ? `<img src="${site.icon}" onerror="this.parentElement.innerHTML='${placeholderIcon}'">` : placeholderIcon;
+                    
+                    // 动态检测是否需要滚动
                     card.innerHTML = `
                         <div class="card-icon">${iconHtml}</div>
                         <div class="card-info">
-                            <div class="text-scroll-wrapper card-title"><span>${site.title}</span></div>
-                            <div class="text-scroll-wrapper card-desc"><span>${site.desc || 'No description'}</span></div>
+                            <div class="card-title">${site.title}</div>
+                            <div class="card-desc"><span>${site.desc || 'No description'}</span></div>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -395,17 +373,33 @@
                 section.appendChild(grid);
                 container.appendChild(section);
             }
+            
+            // === 核心：检测并激活自动滚动 ===
+            // 渲染完成后，检查每个 card-desc 里的 span 宽度
+            setTimeout(() => {
+                document.querySelectorAll('.card-desc').forEach(desc => {
+                    const span = desc.querySelector('span');
+                    if (span && span.offsetWidth > desc.offsetWidth) {
+                        // 只有当文字宽度大于容器宽度时，才添加滚动类
+                        desc.classList.add('scrolling');
+                        // 动态计算滚动距离
+                        const dist = span.offsetWidth - desc.offsetWidth + 10; // 多滚一点点留白
+                        span.style.setProperty('--scroll-dist', `-${dist}px`);
+                        // 根据长度动态调整时间，越长滚得越慢
+                        const duration = 2 + (dist / 20); 
+                        span.style.animationDuration = `${duration}s`;
+                    }
+                });
+            }, 100);
         }
 
-        // === 切换管理模式 ===
         function toggleEditMode() {
             isManageMode = !isManageMode;
-            document.body.classList.toggle('manage-mode', isManageMode); // 用于CSS控制显示分类编辑按钮
+            document.body.classList.toggle('manage-mode', isManageMode);
             document.getElementById('manageBtn').classList.toggle('active', isManageMode);
             renderGrid();
         }
 
-        // === 分类管理逻辑 ===
         function openCatModal(name) {
             document.getElementById('editOldCatName').value = name;
             document.getElementById('editCatName').value = name;
@@ -415,63 +409,35 @@
         async function saveCategory() {
             const oldName = document.getElementById('editOldCatName').value;
             const newName = document.getElementById('editCatName').value.trim();
-
             if (oldName !== newName && newName) {
-                // 调用后端重命名
-                await fetch('/api/category', {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ oldName, newName })
-                });
-                
-                // 更新本地排序记录里的名字
+                await fetch('/api/category', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ oldName, newName }) });
                 const idx = categoryOrder.indexOf(oldName);
                 if (idx !== -1) categoryOrder[idx] = newName;
                 localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
             }
-
-            closeModal('catModalOverlay');
-            // 重新加载所有数据，因为数据库变了
-            loadSites(); 
+            closeModal('catModalOverlay'); loadSites(); 
         }
 
         function moveCategory(dir) {
             const name = document.getElementById('editOldCatName').value;
             const idx = categoryOrder.indexOf(name);
             if (idx === -1) return;
-
-            if (dir === 'up' && idx > 0) {
-                [categoryOrder[idx], categoryOrder[idx-1]] = [categoryOrder[idx-1], categoryOrder[idx]];
-            } else if (dir === 'down' && idx < categoryOrder.length - 1) {
-                [categoryOrder[idx], categoryOrder[idx+1]] = [categoryOrder[idx+1], categoryOrder[idx]];
-            }
-            
+            if (dir === 'up' && idx > 0) [categoryOrder[idx], categoryOrder[idx-1]] = [categoryOrder[idx-1], categoryOrder[idx]];
+            else if (dir === 'down' && idx < categoryOrder.length - 1) [categoryOrder[idx], categoryOrder[idx+1]] = [categoryOrder[idx+1], categoryOrder[idx]];
             localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
-            renderGrid(); // 实时刷新看效果
+            renderGrid(); 
         }
 
         let contextTargetIndex = -1;
-        function showContextMenu(e, index) {
-            e.preventDefault(); contextTargetIndex = index;
-            const menu = document.getElementById('contextMenu'); menu.style.display = 'flex';
-            let x = e.clientX, y = e.clientY; if (x + 150 > window.innerWidth) x = window.innerWidth - 150;
-            menu.style.left = `${x}px`; menu.style.top = `${y}px`;
-        }
+        function showContextMenu(e, index) { e.preventDefault(); contextTargetIndex = index; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; let x = e.clientX, y = e.clientY; if (x + 150 > window.innerWidth) x = window.innerWidth - 150; menu.style.left = `${x}px`; menu.style.top = `${y}px`; }
         function hideContextMenu() { document.getElementById('contextMenu').style.display = 'none'; }
-        async function handleMenuDelete() {
-            if (contextTargetIndex > -1 && confirm('删除此标签？')) {
-                await fetch(`/api/sites/${sites[contextTargetIndex].id}`, { method: 'DELETE' });
-                loadSites();
-            }
-            hideContextMenu();
-        }
+        async function handleMenuDelete() { if (contextTargetIndex > -1 && confirm('删除此标签？')) { await fetch(`/api/sites/${sites[contextTargetIndex].id}`, { method: 'DELETE' }); loadSites(); } hideContextMenu(); }
         function handleMenuEdit() { if (contextTargetIndex > -1) openModal(true, sites[contextTargetIndex]); hideContextMenu(); }
 
         let isEditing = false, editId = -1;
         function openAddModal() { openModal(false); }
         function openModal(editMode = false, data = null) {
-            isEditing = editMode; 
-            const titleEl = document.getElementById('modalTitle');
+            isEditing = editMode; const titleEl = document.getElementById('modalTitle');
             if (editMode && data) {
                 titleEl.innerText = "编辑网站"; editId = data.id;
                 document.getElementById('siteTitle').value = data.title; document.getElementById('siteDesc').value = data.desc;
@@ -517,14 +483,8 @@
         document.addEventListener('click', () => { hideContextMenu(); document.getElementById('engineDropdown').classList.remove('show'); });
         function triggerSearch() { const val = document.getElementById('searchInput').value; if (val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
         function handleSearch(e) { if (e.key === 'Enter') triggerSearch(); }
-        
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); 
-            document.getElementById('date').innerText = now.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', weekday: 'long' }).replace(/\//g, '-');
-        }
+        function updateTime() { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); document.getElementById('date').innerText = now.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', weekday: 'long' }).replace(/\//g, '-'); }
         setInterval(updateTime, 1000);
-
         initEngine(); loadSites(); updateTime();
     </script>
 </body>
