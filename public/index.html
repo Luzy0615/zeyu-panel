@@ -295,7 +295,7 @@
                 sites = await res.json();
                 if(!Array.isArray(sites)) sites = [];
                 renderGrid();
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error('Sites load error', e); }
         }
 
         async function checkAuth() {
@@ -328,7 +328,7 @@
         // 用户按钮: 登录/用户中心
         function openUserMenu() {
             if (currentUserRole === 'guest') {
-                // 重置登录视图
+                // 重置登录弹窗状态
                 document.getElementById('loginFormView').style.display = 'block';
                 document.getElementById('loginAnimView').style.display = 'none';
                 document.getElementById('loginUser').value = '';
@@ -384,31 +384,40 @@
             const p = document.getElementById('loginPass').value;
             if(!u || !p) return alert("请输入账号密码");
 
-            // 切换视图
+            // 1. 切换到动画视图
             document.getElementById('loginFormView').style.display = 'none';
             document.getElementById('loginAnimView').style.display = 'flex';
+            
+            // 重置动画元素状态
             document.getElementById('loginLoader').style.display = 'block';
             document.getElementById('loginSuccess').style.display = 'none';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginStatusText').innerText = '正在验证...';
 
+            // 2. 强制等待 2 秒 (Promise.all)
             const waitTime = new Promise(resolve => setTimeout(resolve, 2000));
             const loginReq = fetch('/api/auth', { method: 'POST', body: JSON.stringify({ username:u, password:p }) });
 
             try {
                 const [_, res] = await Promise.all([waitTime, loginReq]);
+                
+                // 3. 处理结果
                 document.getElementById('loginLoader').style.display = 'none';
                 
                 if(res.ok) {
+                    // 成功
                     document.getElementById('loginSuccess').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '登录成功';
+                    // 延迟 1秒 关闭
                     setTimeout(() => {
                         closeModal('loginModalOverlay');
                         checkAuth();
                     }, 1000);
                 } else {
+                    // 失败
                     document.getElementById('loginError').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '账号或密码错误';
+                    // 延迟 1.5秒 切回表单
                     setTimeout(() => {
                         document.getElementById('loginAnimView').style.display = 'none';
                         document.getElementById('loginFormView').style.display = 'block';
@@ -497,11 +506,10 @@
         function updateTime() { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); const w=['日','一','二','三','四','五','六']; document.getElementById('dateDisplay').innerText = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} 星期${w[now.getDay()]}`; }
         
         // 启动
-        initEngine(); 
-        loadSites(); 
-        checkAuth(); 
+        initEngine();
+        loadSites(); // 立即加载内容
+        checkAuth(); // 后台检查权限
         setInterval(updateTime, 1000); updateTime();
-        
     </script>
 </body>
 </html>
