@@ -60,21 +60,44 @@
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
         /* 卡片与分类 */
-        .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; }
+        .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 100px; border-radius: 16px; transition: background 0.2s; }
+        .category-section.drag-over { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
+        
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
         .cat-edit-btn { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #eee; font-weight: 500; cursor: pointer; display: none; margin-right: 10px; transition: all 0.2s; }
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s; max-width: 100%; }
+        
+        /* 卡片样式 */
+        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: all 0.3s; max-width: 100%; user-select: none; }
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
-        .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); cursor: alias; }
         
-        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; }
+        /* 编辑模式样式 */
+        body.manage-mode .glass-card { cursor: move; }
+        body.manage-mode .glass-card:hover { transform: none; }
+        body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
+        .glass-card.dragging { opacity: 0.4; transform: scale(0.95); border: 2px dashed var(--accent-color); }
+
+        /* 卡片右上角编辑按钮 */
+        .card-edit-btn { 
+            position: absolute; top: -8px; right: -8px; 
+            width: 24px; height: 24px; 
+            background: var(--accent-color); color: white; 
+            border-radius: 50%; font-size: 14px; 
+            display: none; align-items: center; justify-content: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+            cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8);
+            transition: transform 0.2s;
+        }
+        body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
+        .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
+
+        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; pointer-events: none; }
         .card-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
+        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; }
         .card-title { font-size: 13.5px !important; font-weight: 600; margin-bottom: 4px; color: #fff; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-desc { font-size: 12px !important; color: rgba(255,255,255,0.7); font-weight: 400; line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative; }
         .card-desc span { display: inline-block; }
@@ -124,6 +147,7 @@
         .status-icon.error { background: rgba(255, 69, 58, 0.2); color: var(--error-color); border: 2px solid var(--error-color); }
         .status-text { font-size: 16px; color: #fff; font-weight: 500; }
 
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(1deg); } 75% { transform: rotate(-1deg); } 100% { transform: rotate(0deg); } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
@@ -291,7 +315,7 @@
     </div>
 
     <script>
-        // === 1. 核心状态 (变量声明集中在此处，确保唯一) ===
+        // === 1. 核心状态 (确保仅声明一次) ===
         const engines = {
             bing: { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico' },
             google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
@@ -303,11 +327,13 @@
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
         let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || [];
+        let siteSortOrder = JSON.parse(localStorage.getItem('siteSortOrder')) || [];
         let currentUserRole = 'guest';
         let sites = [];
         let existingCategories = new Set();
-        let contextTargetIndex = -1; // 唯一声明
-        let isEditing = false, editId = -1; // 唯一声明
+        let contextTargetIndex = -1;
+        let isEditing = false, editId = -1;
+        let draggedItem = null;
 
         // === 2. 基础功能 ===
         function initEngine() { document.getElementById('currentEngineIcon').src = engines[currentEngine].icon; }
@@ -351,13 +377,105 @@
             }, 1000);
         }
 
-        // === 5. 核心逻辑 ===
+        // === 5. 拖拽逻辑 ===
+        function handleDragStart(e, id) {
+            if (!isManageMode) return;
+            draggedItem = sites.find(s => s.id === id);
+            e.dataTransfer.setData('text/plain', id);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function handleDragOver(e) {
+            if (!isManageMode) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const section = e.target.closest('.category-section');
+            if (section) section.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            const section = e.target.closest('.category-section');
+            if (section) section.classList.remove('drag-over');
+        }
+
+        async function handleDrop(e, targetCategory) {
+            e.preventDefault();
+            if (!isManageMode || !draggedItem) return;
+            
+            document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
+            
+            // 1. 处理跨分类移动
+            if (draggedItem.category !== targetCategory) {
+                const oldCat = draggedItem.category;
+                draggedItem.category = targetCategory;
+                
+                // 乐观更新 UI
+                renderGrid();
+                
+                // 后台更新
+                try {
+                    await fetch(`/api/sites/${draggedItem.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            title: draggedItem.title,
+                            url: draggedItem.url,
+                            desc: draggedItem.desc,
+                            icon: draggedItem.icon,
+                            category: targetCategory
+                        })
+                    });
+                } catch(err) {
+                    showMsg('移动失败');
+                    draggedItem.category = oldCat; // 回滚
+                    renderGrid();
+                }
+            }
+            
+            // 2. 处理同分类排序
+            const targetCard = e.target.closest('.glass-card');
+            if (targetCard) {
+                const targetId = parseInt(targetCard.getAttribute('data-id'));
+                if (targetId && targetId !== draggedItem.id) {
+                    const fromIndex = sites.findIndex(s => s.id === draggedItem.id);
+                    const toIndex = sites.findIndex(s => s.id === targetId);
+                    
+                    const [movedItem] = sites.splice(fromIndex, 1);
+                    sites.splice(toIndex, 0, movedItem);
+                    
+                    siteSortOrder = sites.map(s => s.id);
+                    localStorage.setItem('siteSortOrder', JSON.stringify(siteSortOrder));
+                    renderGrid();
+                }
+            }
+        }
+
+        // === 6. 核心逻辑 ===
         async function loadSites() {
             try {
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
-                sites = await res.json();
-                if(!Array.isArray(sites)) sites = [];
+                let rawSites = await res.json();
+                if(!Array.isArray(rawSites)) rawSites = [];
+                
+                // 排序
+                if (siteSortOrder.length > 0) {
+                    sites = rawSites.sort((a, b) => {
+                        const idxA = siteSortOrder.indexOf(a.id);
+                        const idxB = siteSortOrder.indexOf(b.id);
+                        if (idxA === -1) return 1;
+                        if (idxB === -1) return -1;
+                        return idxA - idxB;
+                    });
+                } else {
+                    sites = rawSites;
+                }
+                
                 renderGrid();
             } catch(e) { console.error('Sites load error', e); }
         }
@@ -486,7 +604,14 @@
 
             for (const category of keys) {
                 const items = grouped[category];
-                const section = document.createElement('div'); section.className = 'category-section';
+                const section = document.createElement('div'); 
+                section.className = 'category-section';
+                if (isManageMode) {
+                    section.ondragover = handleDragOver;
+                    section.ondrop = (e) => handleDrop(e, category);
+                    section.ondragleave = handleDragLeave;
+                }
+
                 const title = document.createElement('div'); title.className = 'category-title'; 
                 title.innerHTML = `<span>${category}</span><button class="cat-edit-btn" onclick="openCatModal('${category}')">✏️ 编辑</button>`;
                 section.appendChild(title);
@@ -494,14 +619,40 @@
                 items.forEach((site) => {
                     const card = document.createElement('div'); 
                     card.className = `glass-card ${isManageMode ? 'shake' : ''}`;
-                    card.onclick = () => { 
-                        if(isManageMode && currentUserRole === 'admin') openModal(true, site); 
-                        else window.open(site.url, '_blank'); 
+                    card.setAttribute('data-id', site.id);
+                    
+                    if (isManageMode) {
+                        card.draggable = true;
+                        card.ondragstart = (e) => handleDragStart(e, site.id);
+                        card.ondragend = handleDragEnd;
+                    }
+
+                    // 添加右上角编辑按钮
+                    const editBtn = document.createElement('div');
+                    editBtn.className = 'card-edit-btn';
+                    editBtn.innerHTML = '✎';
+                    editBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        openModal(true, site);
                     };
+                    card.appendChild(editBtn);
+
+                    card.onclick = () => { 
+                        if(isManageMode) return; // 编辑模式下点击卡片无操作
+                        window.open(site.url, '_blank'); 
+                    };
+                    
                     const originalIndex = sites.findIndex(s => s.id === site.id);
                     card.oncontextmenu = (e) => showContextMenu(e, originalIndex);
+                    
                     const iconHtml = site.icon ? `<img src="${site.icon}" onerror="this.parentElement.innerHTML='${placeholderIcon}'">` : '';
-                    card.innerHTML = `<div class="card-icon">${iconHtml}</div><div class="card-info"><div class="card-title">${site.title}</div><div class="card-desc"><span>${site.desc||''}</span></div></div>`;
+                    const infoDiv = document.createElement('div'); infoDiv.className = 'card-info';
+                    infoDiv.innerHTML = `<div class="card-title">${site.title}</div><div class="card-desc"><span>${site.desc||''}</span></div>`;
+                    
+                    card.innerHTML = `<div class="card-icon">${iconHtml}</div>`;
+                    card.appendChild(infoDiv);
+                    card.appendChild(editBtn); // 重新附加按钮，确保在最上层
+
                     grid.appendChild(card);
                 });
                 section.appendChild(grid); container.appendChild(section);
@@ -574,7 +725,7 @@
                 loadSites(); 
             } catch (e) {
                 hideLoading(false, '保存失败');
-                setTimeout(() => document.getElementById('modalOverlay').classList.add('active'), 1200); // 失败后重新打开编辑框
+                setTimeout(() => document.getElementById('modalOverlay').classList.add('active'), 1200); 
             }
         }
         
