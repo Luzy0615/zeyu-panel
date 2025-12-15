@@ -32,12 +32,13 @@
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; }
 
-        /* === 头部：标题 | 时间 (绝对居中) === */
+        /* === 头部布局 === */
         .header-container { 
             display: flex; 
+            flex-direction: row; /* 电脑端默认横向 */
             align-items: center; 
             justify-content: center; 
-            margin-bottom: 15px; 
+            margin-bottom: 10px; 
             animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         
@@ -68,7 +69,7 @@
             margin-top: -4px;
         }
 
-        /* Hello World 控件 */
+        /* === 修复 2：纯文字副标题 (去背景) === */
         .subtitle-container {
             text-align: center;
             margin-bottom: 45px;
@@ -77,16 +78,17 @@
 
         .subtitle-text {
             display: inline-block;
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-filter);
-            padding: 8px 20px;
-            border-radius: 50px;
-            border: 1px solid var(--glass-border);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            font-weight: 500;
-            letter-spacing: 1px;
+            font-size: 1.3rem; /* 稍微加大一点 */
+            color: rgba(255, 255, 255, 0.95);
+            /* 去掉所有背景和边框 */
+            background: transparent;
+            backdrop-filter: none;
+            border: none;
+            /* 加强阴影，保证在亮色壁纸上也能看清 */
+            text-shadow: 0 2px 15px rgba(0,0,0,0.7); 
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            font-family: "PingFang SC", sans-serif;
         }
 
         /* 搜索栏 */
@@ -167,12 +169,10 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
-        /* === 核心修改：弹窗玻璃磨砂风格 === */
+        /* === 修复 1：更通透的弹窗 === */
         .modal { 
-            /* 背景半透明黑色 */
-            background: rgba(35, 35, 35, 0.65); 
-            /* 高强度模糊 */
-            backdrop-filter: blur(25px); 
+            background: rgba(30, 30, 30, 0.4); /* 透明度降低 */
+            backdrop-filter: blur(25px); /* 高斯模糊 */
             -webkit-backdrop-filter: blur(25px);
             width: 360px; padding: 25px; 
             border-radius: 24px; 
@@ -185,17 +185,13 @@
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; }
         
-        /* 输入框也使用半透明玻璃风 */
         .input-field { 
             width: 100%; 
-            background: rgba(0, 0, 0, 0.3); /* 半透明深色 */
+            background: rgba(0, 0, 0, 0.25); /* 输入框也更透 */
             border: 1px solid rgba(255, 255, 255, 0.1); 
             padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; 
         }
-        .input-field:focus { 
-            border-color: var(--accent-color); 
-            background: rgba(0, 0, 0, 0.5); 
-        }
+        .input-field:focus { border-color: var(--accent-color); background: rgba(0, 0, 0, 0.4); }
         
         .url-input-wrapper { display: flex; gap: 8px; }
         .btn-get { padding: 0 12px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); border: 1px solid rgba(10, 132, 255, 0.3); border-radius: 10px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: 0.2s; }
@@ -213,11 +209,23 @@
         @keyframes cardEntrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
+        /* === 修复 3：移动端适配 (堆叠布局) === */
         @media (max-width: 600px) { 
-            .header-container { margin-bottom: 15px; }
-            .separator { width: 2px; height: 32px; margin: 0 15px; }
-            .site-title { font-size: 2.2rem; }
-            .clock { font-size: 2.2rem; }
+            .header-container { 
+                flex-direction: column; /* 手机端强制纵向排列 */
+                gap: 5px; 
+                margin-bottom: 20px; 
+            }
+            .separator { display: none; } /* 手机端隐藏竖线 */
+            
+            .site-title { 
+                font-size: 2.5rem; /* 稍微缩小一点 */
+                margin-top: 0;
+            }
+            .clock { 
+                font-size: 2.5rem; /* 时间也随之缩小 */
+                margin-top: 0;
+            }
             
             .search-container { max-width: 88%; margin-bottom: 25px; }
             .search-wrapper { border-radius: 30px; padding-right: 4px; min-height: 44px; }
