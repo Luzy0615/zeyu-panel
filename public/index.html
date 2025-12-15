@@ -15,7 +15,6 @@
             --accent-color: #0A84FF; 
             --success-color: #30D158;
             --error-color: #FF453A;
-            --warning-color: #FF9F0A;
             --font-stack: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         
@@ -94,12 +93,11 @@
         .context-item:hover { background: var(--accent-color); }
         .context-item.delete:hover { background: #FF453A; }
 
-        /* 弹窗系统 */
+        /* 弹窗通用 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal { background: rgba(30, 30, 30, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); width: 360px; padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 60px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.active .modal { transform: scale(1); }
-        
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; }
         .input-field { width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; }
@@ -114,13 +112,31 @@
         .user-list th, .user-list td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-role-select { background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px; }
 
+        /* === 修复 1：“获取”按钮样式 === */
+        .url-input-wrapper { display: flex; gap: 8px; }
+        .btn-get { 
+            padding: 0 15px; 
+            background: rgba(10, 132, 255, 0.2); 
+            color: var(--accent-color); 
+            border: 1px solid rgba(10, 132, 255, 0.3); 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 13px; font-weight: 600;
+            white-space: nowrap; 
+            transition: 0.2s; 
+            /* 确保高度与输入框一致 */
+            height: 42px; /* input 12px*2 padding + 14px font + 2px border ≈ 40-42px */
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-get:hover { background: var(--accent-color); color: white; }
+        .btn-get:active { transform: scale(0.95); }
+
         /* 动画与图标 */
-        .login-anim-view, .msg-anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
+        .anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
         .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         .status-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .status-icon.success { background: rgba(48, 209, 88, 0.2); color: var(--success-color); border: 2px solid var(--success-color); }
         .status-icon.error { background: rgba(255, 69, 58, 0.2); color: var(--error-color); border: 2px solid var(--error-color); }
-        .status-icon.warning { background: rgba(255, 159, 10, 0.2); color: var(--warning-color); border: 2px solid var(--warning-color); }
         .status-text { font-size: 16px; color: #fff; font-weight: 500; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -208,7 +224,7 @@
 
     <div class="modal-overlay" id="loginModalOverlay">
         <div class="modal">
-            <div class="login-form-view" id="loginFormView">
+            <div class="form-view" id="loginFormView">
                 <h3 style="color:white; margin-bottom:20px; text-align:center;">用户登录</h3>
                 <div class="input-group"><label>用户名</label><input type="text" class="input-field" id="loginUser"></div>
                 <div class="input-group"><label>密码</label><input type="password" class="input-field" id="loginPass"></div>
@@ -217,7 +233,7 @@
                     <button class="btn btn-save" onclick="handleLogin()">登录</button>
                 </div>
             </div>
-            <div class="login-anim-view" id="loginAnimView">
+            <div class="anim-view" id="loginAnimView">
                 <div id="loginLoader" class="spinner"></div>
                 <div id="loginSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                 <div id="loginError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
@@ -226,12 +242,13 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="messageModalOverlay">
+    <div class="modal-overlay" id="loadingModalOverlay">
         <div class="modal" style="text-align: center; width: 300px;">
-            <div class="msg-anim-view" style="display:flex;">
-                <div id="msgIcon" class="status-icon" style="margin: 0 auto 15px;"></div>
-                <h3 id="msgText" style="color: white; margin-bottom: 20px; font-weight: normal; font-size: 16px;">Message</h3>
-                <button class="btn btn-save" onclick="closeModal('messageModalOverlay')" style="width: 100%;">确定</button>
+            <div class="anim-view" style="display:flex;">
+                <div id="commonLoader" class="spinner"></div>
+                <div id="commonSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                <div id="commonError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                <p class="status-text" id="commonStatusText">处理中...</p>
             </div>
         </div>
     </div>
@@ -297,24 +314,28 @@
         function triggerSearch() { const val = document.getElementById('searchInput').value; if(val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
         function handleSearch(e) { if(e.key === 'Enter') triggerSearch(); }
 
-        // === 通用提示弹窗逻辑 ===
-        function showMessage(text, type = 'info') {
-            const iconEl = document.getElementById('msgIcon');
-            const textEl = document.getElementById('msgText');
-            iconEl.className = 'status-icon ' + type;
-            textEl.innerText = text;
-            
-            // SVG 图标定义
-            const icons = {
-                success: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-                error: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-                warning: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
-            };
-            iconEl.innerHTML = icons[type] || icons.warning;
-            document.getElementById('messageModalOverlay').classList.add('active');
+        // === 通用加载动画封装 ===
+        function showProcessModal(text) {
+            const overlay = document.getElementById('loadingModalOverlay');
+            document.getElementById('commonLoader').style.display = 'block';
+            document.getElementById('commonSuccess').style.display = 'none';
+            document.getElementById('commonError').style.display = 'none';
+            document.getElementById('commonStatusText').innerText = text;
+            overlay.classList.add('active');
         }
 
-        // === 加载数据 (并行) ===
+        function endProcessModal(isSuccess, text, callback) {
+            document.getElementById('commonLoader').style.display = 'none';
+            const iconId = isSuccess ? 'commonSuccess' : 'commonError';
+            document.getElementById(iconId).style.display = 'flex';
+            document.getElementById('commonStatusText').innerText = text;
+            setTimeout(() => {
+                document.getElementById('loadingModalOverlay').classList.remove('active');
+                if (callback) callback();
+            }, 1500);
+        }
+
+        // === 数据交互 ===
         async function loadSites() {
             try {
                 const res = await fetch('/api/sites');
@@ -343,7 +364,7 @@
 
         // === 交互逻辑 ===
         function toggleEditMode() {
-            if(currentUserRole !== 'admin') return showMessage('需要管理员权限才能编辑', 'warning');
+            if(currentUserRole !== 'admin') return alert('需要管理员权限');
             isManageMode = !isManageMode;
             document.body.classList.toggle('manage-mode', isManageMode);
             document.getElementById('manageBtn').classList.toggle('active', isManageMode);
@@ -369,22 +390,19 @@
             }
         }
 
-        // === 登录逻辑 (核心动画) ===
+        // === 登录逻辑 ===
         async function handleLogin() {
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
-            if(!u || !p) return; // 简单校验
+            if(!u || !p) return; 
 
-            // 1. 切换到动画视图
             document.getElementById('loginFormView').style.display = 'none';
             document.getElementById('loginAnimView').style.display = 'flex';
-            
             document.getElementById('loginLoader').style.display = 'block';
             document.getElementById('loginSuccess').style.display = 'none';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginStatusText').innerText = '正在验证...';
 
-            // 2. 强制等待 2 秒
             const waitTime = new Promise(resolve => setTimeout(resolve, 2000));
             const loginReq = fetch('/api/auth', { method: 'POST', body: JSON.stringify({ username:u, password:p }) });
 
@@ -395,10 +413,7 @@
                 if(res.ok) {
                     document.getElementById('loginSuccess').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '登录成功';
-                    setTimeout(() => {
-                        closeModal('loginModalOverlay');
-                        checkAuth();
-                    }, 1000);
+                    setTimeout(() => { closeModal('loginModalOverlay'); checkAuth(); }, 1000);
                 } else {
                     document.getElementById('loginError').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '账号或密码错误';
@@ -422,10 +437,57 @@
             await fetch('/api/auth', { method: 'DELETE' });
             closeModal('userProfileModalOverlay');
             checkAuth();
-            showMessage('已安全退出', 'success');
+            alert('已退出');
         }
 
-        // === 用户管理 (Admin) ===
+        // === 获取信息 (带动画) ===
+        async function fetchSiteInfo() {
+            const url = document.getElementById('siteUrl').value.trim();
+            if (!url) return;
+            
+            showProcessModal('正在获取信息...');
+            
+            try {
+                const res = await fetch(`/api/get_info?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+                if (data.title) document.getElementById('siteTitle').value = data.title;
+                if (data.desc) document.getElementById('siteDesc').value = data.desc;
+                if (data.icon) document.getElementById('siteIcon').value = data.icon;
+                endProcessModal(true, '获取成功');
+            } catch(e) {
+                endProcessModal(false, '获取失败');
+            }
+        }
+
+        // === 保存网站 (带动画) ===
+        async function saveSite() {
+            const payload = {
+                title: document.getElementById('siteTitle').value, 
+                url: document.getElementById('siteUrl').value, 
+                desc: document.getElementById('siteDesc').value, 
+                icon: document.getElementById('siteIcon').value, 
+                category: document.getElementById('siteCategory').value || '默认分类'
+            }; 
+            if(!payload.title || !payload.url) return alert('必填'); 
+            
+            // 关闭编辑框，显示加载框
+            closeModal('modalOverlay');
+            showProcessModal('正在保存...');
+
+            try {
+                if(isEditing) await fetch(`/api/sites/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+                else await fetch('/api/sites', { method: 'POST', body: JSON.stringify(payload) });
+                
+                endProcessModal(true, '保存成功', loadSites);
+            } catch (e) {
+                endProcessModal(false, '保存失败', () => {
+                    // 失败后重新打开编辑框
+                    document.getElementById('modalOverlay').classList.add('active');
+                });
+            }
+        }
+
+        // ... (其余辅助函数保持不变) ...
         async function loadUserList() {
             const container = document.getElementById('userListContainer');
             container.innerHTML = 'Loading users...';
@@ -444,10 +506,9 @@
         async function updateUserRole(id) {
             const newRole = document.getElementById(`role-${id}`).value;
             await fetch('/api/users', { method: 'PUT', body: JSON.stringify({ id, newRole }) });
-            showMessage('权限已更新', 'success');
+            alert('权限已更新');
         }
 
-        // === 网格渲染 ===
         function renderGrid() {
             const container = document.getElementById('cardGrid'); container.innerHTML = '';
             existingCategories.clear(); const catList = document.getElementById('catList'); catList.innerHTML = '';
@@ -489,17 +550,30 @@
             setTimeout(() => { document.querySelectorAll('.card-desc').forEach(desc => { const span = desc.querySelector('span'); if (span && span.offsetWidth > desc.offsetWidth) { desc.classList.add('scrolling'); const dist = span.offsetWidth - desc.offsetWidth + 10; span.style.setProperty('--scroll-dist', `-${dist}px`); span.style.animationDuration = `${2 + dist/20}s`; } }); }, 100);
         }
 
-        // === 菜单与其他 ===
+        let contextTargetIndex = -1;
         function showContextMenu(e, index) { e.preventDefault(); contextTargetIndex = index; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; let x = e.clientX, y = e.clientY; if (x + 160 > window.innerWidth) x -= 160; menu.style.left = `${x}px`; menu.style.top = `${y}px`; }
         document.addEventListener('click', () => { document.getElementById('contextMenu').style.display = 'none'; document.getElementById('engineDropdown').classList.remove('show'); });
         function handleMenuOpenNewTab() { if(contextTargetIndex > -1) window.open(sites[contextTargetIndex].url, '_blank'); }
         function handleMenuEdit() { if(contextTargetIndex > -1) openModal(true, sites[contextTargetIndex]); }
         async function handleMenuDelete() { if(contextTargetIndex > -1 && confirm('Delete?')) { await fetch(`/api/sites/${sites[contextTargetIndex].id}`, {method:'DELETE'}); loadSites(); } }
 
+        function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
+        async function saveCategory() { const o=document.getElementById('editOldCatName').value, n=document.getElementById('editCatName').value; if(o!==n && n) { await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); const i=categoryOrder.indexOf(o); if(i!==-1)categoryOrder[i]=n; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); } closeModal('catModalOverlay'); loadSites(); }
+        function moveCategory(dir) { const n=document.getElementById('editOldCatName').value, i=categoryOrder.indexOf(n); if(i===-1)return; if(dir==='up'&&i>0)[categoryOrder[i],categoryOrder[i-1]]=[categoryOrder[i-1],categoryOrder[i]]; else if(dir==='down'&&i<categoryOrder.length-1)[categoryOrder[i],categoryOrder[i+1]]=[categoryOrder[i+1],categoryOrder[i]]; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); renderGrid(); }
+        function updateTime() { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); const w=['日','一','二','三','四','五','六']; document.getElementById('dateDisplay').innerText = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} 星期${w[now.getDay()]}`; }
+        
         function openAddModal() { openModal(false); }
         function openModal(editMode=false, data=null) {
             isEditing = editMode; document.getElementById('modalOverlay').classList.add('active');
             if(editMode && data) { editId = data.id; document.getElementById('siteTitle').value = data.title; document.getElementById('siteUrl').value = data.url; document.getElementById('siteDesc').value = data.desc; document.getElementById('siteIcon').value = data.icon; document.getElementById('siteCategory').value = data.category; } 
             else { ['siteTitle','siteUrl','siteDesc','siteIcon','siteCategory'].forEach(id=>document.getElementById(id).value=''); }
         }
-        function closeModal(id) { document.getElementById(id).classList.remove
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        initEngine();
+        loadSites();
+        checkAuth();
+        setInterval(updateTime, 1000); updateTime();
+    </script>
+</body>
+</html>
