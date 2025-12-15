@@ -15,7 +15,6 @@
             --accent-color: #0A84FF; 
             --success-color: #30D158;
             --error-color: #FF453A;
-            --warning-color: #FF9F0A;
             --font-stack: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         
@@ -42,7 +41,7 @@
         .clock { font-size: 2.6rem; font-weight: 800; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-top: -2px; }
 
         .subtitle-container { text-align: center; margin-bottom: 35px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
-        .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; font-family: "PingFang SC", sans-serif; }
+        .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; font-family: "PingFang SC", sans-serif; cursor: pointer; }
 
         /* 搜索栏 */
         .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
@@ -60,7 +59,7 @@
         .engine-option { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
-        /* 卡片 */
+        /* 卡片与分类 */
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
         .cat-edit-btn { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #eee; font-weight: 500; cursor: pointer; display: none; margin-right: 10px; transition: all 0.2s; }
@@ -94,33 +93,38 @@
         .context-item:hover { background: var(--accent-color); }
         .context-item.delete:hover { background: #FF453A; }
 
-        /* 弹窗系统 */
+        /* 弹窗通用 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal { background: rgba(30, 30, 30, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); width: 360px; padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 60px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        /* 弹窗高度自适应，方便回缩动画 */
+        .modal { background: rgba(30, 30, 30, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); width: 360px; padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 60px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); min-height: 150px; display:flex; flex-direction:column; justify-content:center; }
         .modal-overlay.active .modal { transform: scale(1); }
         
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; }
+        .input-group { margin-bottom: 15px; width: 100%; }
+        .input-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 6px; text-align: left; }
         .input-field { width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: white; outline: none; font-size: 14px; transition: 0.3s; }
         .input-field:focus { border-color: var(--accent-color); background: rgba(0, 0, 0, 0.4); }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .url-input-wrapper { display: flex; gap: 8px; }
+        .btn-get { padding: 0 12px; background: rgba(10, 132, 255, 0.2); color: var(--accent-color); border: 1px solid rgba(10, 132, 255, 0.3); border-radius: 10px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: 0.2s; }
+        .btn-get:hover { background: var(--accent-color); color: white; }
+        .btn-get:disabled { opacity: 0.5; cursor: wait; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; width: 100%; }
         .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-cancel { background: rgba(255, 255, 255, 0.1); color: #ccc; }
         .btn-cancel:hover { background: rgba(255, 255, 255, 0.2); color: white; }
         .btn-save { background: var(--accent-color); color: white; }
         .btn-move { flex: 0.5; background: rgba(255, 255, 255, 0.15); font-size: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; }
+        
         .user-list { width: 100%; border-collapse: collapse; margin-bottom: 20px; color: #eee; font-size: 13px; }
         .user-list th, .user-list td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-role-select { background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px; }
 
-        /* 动画与图标 */
-        .login-anim-view, .msg-anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
+        /* 登录动画相关 */
+        .login-anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
         .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         .status-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .status-icon.success { background: rgba(48, 209, 88, 0.2); color: var(--success-color); border: 2px solid var(--success-color); }
         .status-icon.error { background: rgba(255, 69, 58, 0.2); color: var(--error-color); border: 2px solid var(--error-color); }
-        .status-icon.warning { background: rgba(255, 159, 10, 0.2); color: var(--warning-color); border: 2px solid var(--warning-color); }
         .status-text { font-size: 16px; color: #fff; font-weight: 500; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -208,7 +212,7 @@
 
     <div class="modal-overlay" id="loginModalOverlay">
         <div class="modal">
-            <div class="login-form-view" id="loginFormView">
+            <div class="login-form-view" id="loginFormView" style="width:100%">
                 <h3 style="color:white; margin-bottom:20px; text-align:center;">用户登录</h3>
                 <div class="input-group"><label>用户名</label><input type="text" class="input-field" id="loginUser"></div>
                 <div class="input-group"><label>密码</label><input type="password" class="input-field" id="loginPass"></div>
@@ -222,16 +226,6 @@
                 <div id="loginSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                 <div id="loginError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
                 <p class="status-text" id="loginStatusText">正在登录...</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="messageModalOverlay">
-        <div class="modal" style="text-align: center; width: 300px;">
-            <div class="msg-anim-view" style="display:flex;">
-                <div id="msgIcon" class="status-icon" style="margin: 0 auto 15px;"></div>
-                <h3 id="msgText" style="color: white; margin-bottom: 20px; font-weight: normal; font-size: 16px;">Message</h3>
-                <button class="btn btn-save" onclick="closeModal('messageModalOverlay')" style="width: 100%;">确定</button>
             </div>
         </div>
     </div>
@@ -273,7 +267,6 @@
     </div>
 
     <script>
-        // === 核心变量 ===
         const engines = {
             bing: { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico' },
             google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
@@ -290,31 +283,12 @@
         let contextTargetIndex = -1;
         let isEditing = false, editId = -1;
 
-        // === 初始化 ===
         function initEngine() { document.getElementById('currentEngineIcon').src = engines[currentEngine].icon; }
         function toggleEngineMenu(e) { e.stopPropagation(); document.getElementById('engineDropdown').classList.toggle('show'); }
         function changeEngine(key) { currentEngine = key; localStorage.setItem('myEngine', key); initEngine(); }
         function triggerSearch() { const val = document.getElementById('searchInput').value; if(val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
         function handleSearch(e) { if(e.key === 'Enter') triggerSearch(); }
 
-        // === 通用提示弹窗逻辑 ===
-        function showMessage(text, type = 'info') {
-            const iconEl = document.getElementById('msgIcon');
-            const textEl = document.getElementById('msgText');
-            iconEl.className = 'status-icon ' + type;
-            textEl.innerText = text;
-            
-            // SVG 图标定义
-            const icons = {
-                success: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-                error: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-                warning: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
-            };
-            iconEl.innerHTML = icons[type] || icons.warning;
-            document.getElementById('messageModalOverlay').classList.add('active');
-        }
-
-        // === 加载数据 (并行) ===
         async function loadSites() {
             try {
                 const res = await fetch('/api/sites');
@@ -341,9 +315,8 @@
             if(!isAdmin && isManageMode) toggleEditMode();
         }
 
-        // === 交互逻辑 ===
         function toggleEditMode() {
-            if(currentUserRole !== 'admin') return showMessage('需要管理员权限才能编辑', 'warning');
+            if(currentUserRole !== 'admin') return alert('需要管理员权限');
             isManageMode = !isManageMode;
             document.body.classList.toggle('manage-mode', isManageMode);
             document.getElementById('manageBtn').classList.toggle('active', isManageMode);
@@ -352,6 +325,7 @@
 
         function openUserMenu() {
             if (currentUserRole === 'guest') {
+                // 重置登录弹窗状态
                 document.getElementById('loginFormView').style.display = 'block';
                 document.getElementById('loginAnimView').style.display = 'none';
                 document.getElementById('loginUser').value = '';
@@ -369,39 +343,46 @@
             }
         }
 
-        // === 登录逻辑 (核心动画) ===
+        // === 登录逻辑 (带动画) ===
         async function handleLogin() {
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
-            if(!u || !p) return; // 简单校验
+            if(!u || !p) return alert("请输入账号密码");
 
             // 1. 切换到动画视图
             document.getElementById('loginFormView').style.display = 'none';
             document.getElementById('loginAnimView').style.display = 'flex';
             
+            // 重置动画元素状态
             document.getElementById('loginLoader').style.display = 'block';
             document.getElementById('loginSuccess').style.display = 'none';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginStatusText').innerText = '正在验证...';
 
-            // 2. 强制等待 2 秒
+            // 2. 强制等待 2 秒 (Promise.all)
             const waitTime = new Promise(resolve => setTimeout(resolve, 2000));
             const loginReq = fetch('/api/auth', { method: 'POST', body: JSON.stringify({ username:u, password:p }) });
 
             try {
                 const [_, res] = await Promise.all([waitTime, loginReq]);
+                
+                // 3. 处理结果
                 document.getElementById('loginLoader').style.display = 'none';
                 
                 if(res.ok) {
+                    // 成功
                     document.getElementById('loginSuccess').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '登录成功';
+                    // 延迟 1秒 关闭
                     setTimeout(() => {
                         closeModal('loginModalOverlay');
                         checkAuth();
                     }, 1000);
                 } else {
+                    // 失败
                     document.getElementById('loginError').style.display = 'flex';
                     document.getElementById('loginStatusText').innerText = '账号或密码错误';
+                    // 延迟 1.5秒 切回表单
                     setTimeout(() => {
                         document.getElementById('loginAnimView').style.display = 'none';
                         document.getElementById('loginFormView').style.display = 'block';
@@ -422,10 +403,9 @@
             await fetch('/api/auth', { method: 'DELETE' });
             closeModal('userProfileModalOverlay');
             checkAuth();
-            showMessage('已安全退出', 'success');
+            alert('已退出');
         }
 
-        // === 用户管理 (Admin) ===
         async function loadUserList() {
             const container = document.getElementById('userListContainer');
             container.innerHTML = 'Loading users...';
@@ -444,10 +424,9 @@
         async function updateUserRole(id) {
             const newRole = document.getElementById(`role-${id}`).value;
             await fetch('/api/users', { method: 'PUT', body: JSON.stringify({ id, newRole }) });
-            showMessage('权限已更新', 'success');
+            alert('权限已更新');
         }
 
-        // === 网格渲染 ===
         function renderGrid() {
             const container = document.getElementById('cardGrid'); container.innerHTML = '';
             existingCategories.clear(); const catList = document.getElementById('catList'); catList.innerHTML = '';
@@ -489,7 +468,7 @@
             setTimeout(() => { document.querySelectorAll('.card-desc').forEach(desc => { const span = desc.querySelector('span'); if (span && span.offsetWidth > desc.offsetWidth) { desc.classList.add('scrolling'); const dist = span.offsetWidth - desc.offsetWidth + 10; span.style.setProperty('--scroll-dist', `-${dist}px`); span.style.animationDuration = `${2 + dist/20}s`; } }); }, 100);
         }
 
-        // === 菜单与其他 ===
+        let contextTargetIndex = -1;
         function showContextMenu(e, index) { e.preventDefault(); contextTargetIndex = index; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; let x = e.clientX, y = e.clientY; if (x + 160 > window.innerWidth) x -= 160; menu.style.left = `${x}px`; menu.style.top = `${y}px`; }
         document.addEventListener('click', () => { document.getElementById('contextMenu').style.display = 'none'; document.getElementById('engineDropdown').classList.remove('show'); });
         function handleMenuOpenNewTab() { if(contextTargetIndex > -1) window.open(sites[contextTargetIndex].url, '_blank'); }
@@ -504,25 +483,16 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         async function fetchSiteInfo() { const url=document.getElementById('siteUrl').value; if(!url)return; try{const res=await fetch(`/api/get_info?url=${encodeURIComponent(url)}`);const d=await res.json();if(d.title)document.getElementById('siteTitle').value=d.title;if(d.desc)document.getElementById('siteDesc').value=d.desc;if(d.icon)document.getElementById('siteIcon').value=d.icon;}catch(e){} }
-        
-        async function saveSite() { 
-            const payload={title:document.getElementById('siteTitle').value, url:document.getElementById('siteUrl').value, desc:document.getElementById('siteDesc').value, icon:document.getElementById('siteIcon').value, category:document.getElementById('siteCategory').value||'默认分类'}; 
-            if(!payload.title||!payload.url)return alert('必填'); 
-            if(isEditing) await fetch(`/api/sites/${editId}`,{method:'PUT',body:JSON.stringify(payload)}); else await fetch('/api/sites',{method:'POST',body:JSON.stringify(payload)}); 
-            closeModal('modalOverlay'); 
-            showMessage('保存成功', 'success');
-            loadSites(); 
-        }
-        
+        async function saveSite() { const payload={title:document.getElementById('siteTitle').value, url:document.getElementById('siteUrl').value, desc:document.getElementById('siteDesc').value, icon:document.getElementById('siteIcon').value, category:document.getElementById('siteCategory').value||'默认分类'}; if(!payload.title||!payload.url)return alert('必填'); if(isEditing) await fetch(`/api/sites/${editId}`,{method:'PUT',body:JSON.stringify(payload)}); else await fetch('/api/sites',{method:'POST',body:JSON.stringify(payload)}); closeModal('modalOverlay'); loadSites(); }
         function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
-        async function saveCategory() { const o=document.getElementById('editOldCatName').value, n=document.getElementById('editCatName').value; if(o!==n && n) { await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); const i=categoryOrder.indexOf(o); if(i!==-1)categoryOrder[i]=n; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); } closeModal('catModalOverlay'); loadSites(); showMessage('分类已更新', 'success'); }
+        async function saveCategory() { const o=document.getElementById('editOldCatName').value, n=document.getElementById('editCatName').value; if(o!==n && n) { await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); const i=categoryOrder.indexOf(o); if(i!==-1)categoryOrder[i]=n; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); } closeModal('catModalOverlay'); loadSites(); }
         function moveCategory(dir) { const n=document.getElementById('editOldCatName').value, i=categoryOrder.indexOf(n); if(i===-1)return; if(dir==='up'&&i>0)[categoryOrder[i],categoryOrder[i-1]]=[categoryOrder[i-1],categoryOrder[i]]; else if(dir==='down'&&i<categoryOrder.length-1)[categoryOrder[i],categoryOrder[i+1]]=[categoryOrder[i+1],categoryOrder[i]]; localStorage.setItem('categoryOrder',JSON.stringify(categoryOrder)); renderGrid(); }
         function updateTime() { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); const w=['日','一','二','三','四','五','六']; document.getElementById('dateDisplay').innerText = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} 星期${w[now.getDay()]}`; }
         
         // 启动
         initEngine();
-        loadSites();
-        checkAuth();
+        loadSites(); // 先加载数据
+        checkAuth(); // 再检查权限
         setInterval(updateTime, 1000); updateTime();
     </script>
 </body>
