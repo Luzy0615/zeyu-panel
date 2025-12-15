@@ -53,10 +53,31 @@
         .modal { background: #252525; width: 380px; padding: 30px; border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: 0 25px 80px rgba(0,0,0,0.8); transform: scale(0.9); transition: transform 0.3s; }
         .modal-overlay.active .modal { transform: scale(1); }
         .input-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; }
-        .input-field { width: 100%; background: #333; border: 1px solid #444; padding: 14px; border-radius: 12px; color: white; outline: none; margin-bottom: 20px; transition: 0.3s; }
+        .input-field { width: 100%; background: #333; border: 1px solid #444; padding: 14px; border-radius: 12px; color: white; outline: none; transition: 0.3s; }
         .input-field:focus { border-color: var(--accent-color); }
-        .input-field.loading { border-color: var(--accent-color); opacity: 0.6; }
-        .modal-btns { display: flex; gap: 15px; }
+        
+        /* === V12.0 新增样式：URL输入框组合 === */
+        .url-input-wrapper { display: flex; gap: 10px; margin-bottom: 20px;}
+        .url-input-wrapper .input-field { margin-bottom: 0; } /* 去掉原来的margin */
+        
+        /* 获取按钮样式 */
+        .btn-get {
+            padding: 0 15px;
+            background: rgba(10, 132, 255, 0.2);
+            color: var(--accent-color);
+            border: 1px solid rgba(10, 132, 255, 0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .btn-get:hover { background: var(--accent-color); color: white; }
+        .btn-get:active { transform: scale(0.95); }
+        .btn-get:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .modal-btns { display: flex; gap: 15px; margin-top: 25px;}
         .btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
         .btn-cancel { background: #444; color: #ccc; }
         .btn-save { background: var(--accent-color); color: white; }
@@ -114,10 +135,20 @@
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <h3 id="modalTitle" style="color:white; margin-bottom:25px; text-align:center;">Add Shortcut</h3>
+            
             <div class="input-group"><label>标题</label><input type="text" class="input-field" id="siteTitle" placeholder="自动获取..."></div>
             <div class="input-group"><label>描述</label><input type="text" class="input-field" id="siteDesc" placeholder="自动获取..."></div>
-            <div class="input-group"><label>链接 (URL)</label><input type="text" class="input-field" id="siteUrl" placeholder="输入网址，自动抓取所有信息"></div>
+            
+            <div class="input-group">
+                <label>链接 (URL)</label>
+                <div class="url-input-wrapper">
+                    <input type="text" class="input-field" id="siteUrl" placeholder="输入网址 (例如 bilibili.com)">
+                    <button class="btn-get" id="btnGetInfo" onclick="fetchSiteInfo()">自动获取</button>
+                </div>
+            </div>
+            
             <div class="input-group"><label>图标链接 (可选)</label><input type="text" class="input-field" id="siteIcon" placeholder="自动获取..."></div>
+            
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal()">取消</button>
                 <button class="btn btn-save" onclick="saveSite()">保存</button>
@@ -202,38 +233,44 @@
         }
         function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 
-        // === 修改后的自动抓取逻辑：全靠后端 ===
-        document.getElementById('siteUrl').addEventListener('blur', async function() {
-            const urlVal = this.value.trim();
+        // === 修改：手动点击按钮触发获取 ===
+        async function fetchSiteInfo() {
+            const urlInput = document.getElementById('siteUrl');
+            const urlVal = urlInput.value.trim();
+            const btn = document.getElementById('btnGetInfo');
             const iconInput = document.getElementById('siteIcon');
             const titleInput = document.getElementById('siteTitle');
             const descInput = document.getElementById('siteDesc');
 
-            if (urlVal && (!titleInput.value || !iconInput.value)) {
-                 // 显示加载状态
-                 titleInput.value = "获取中...";
-                 descInput.value = "获取中...";
-                 titleInput.classList.add('loading');
-                 descInput.classList.add('loading');
-                 
-                 try {
-                     const res = await fetch(`/api/get_info?url=${encodeURIComponent(urlVal)}`);
-                     const data = await res.json();
-                     
-                     if (data.title) titleInput.value = data.title;
-                     if (data.desc) descInput.value = data.desc;
-                     if (data.icon) iconInput.value = data.icon; // 使用后端抓取的图标
-                     
-                 } catch (err) {
-                     console.error("获取信息失败");
-                     titleInput.value = "";
-                     descInput.value = "";
-                 } finally {
-                     titleInput.classList.remove('loading');
-                     descInput.classList.remove('loading');
-                 }
+            if (!urlVal) {
+                alert("请先输入网址！");
+                return;
             }
-        });
+
+            // 1. 改变按钮状态
+            const originalText = btn.innerText;
+            btn.innerText = "获取中...";
+            btn.disabled = true;
+
+            try {
+                // 2. 调用后端 API
+                const res = await fetch(`/api/get_info?url=${encodeURIComponent(urlVal)}`);
+                const data = await res.json();
+                
+                // 3. 填入数据
+                if (data.title) titleInput.value = data.title;
+                if (data.desc) descInput.value = data.desc;
+                if (data.icon) iconInput.value = data.icon;
+                
+            } catch (err) {
+                console.error("获取失败", err);
+                alert("获取失败，请手动填写");
+            } finally {
+                // 4. 恢复按钮状态
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
 
         async function saveSite() {
             const title = document.getElementById('siteTitle').value.trim();
