@@ -71,7 +71,7 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         
         /* 卡片样式 */
-        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: all 0.3s; max-width: 100%; user-select: none; }
+        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
         
@@ -79,7 +79,7 @@
         body.manage-mode .glass-card { cursor: move; }
         body.manage-mode .glass-card:hover { transform: none; }
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
-        .glass-card.dragging { opacity: 0.4; transform: scale(0.95); border: 2px dashed var(--accent-color); }
+        .glass-card.dragging { opacity: 0.5; border: 2px dashed #fff; background: rgba(255,255,255,0.1); } /* 拖拽时样式 */
 
         /* 卡片右上角编辑按钮 */
         .card-edit-btn { 
@@ -377,7 +377,7 @@
             }, 1000);
         }
 
-        // === 5. 拖拽逻辑 ===
+        // === 5. 拖拽逻辑 (自动让位) ===
         function handleDragStart(e, id) {
             if (!isManageMode) return;
             draggedItem = sites.find(s => s.id === id);
@@ -394,9 +394,40 @@
         function handleDragOver(e) {
             if (!isManageMode) return;
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
+            // 获取当前鼠标下的 grid 容器
+            const container = e.target.closest('.grid');
+            if (container) {
+                const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
+                const draggingCard = document.querySelector('.dragging');
+                if (afterElement == null) {
+                    container.appendChild(draggingCard);
+                } else {
+                    container.insertBefore(draggingCard, afterElement);
+                }
+            }
+            
             const section = e.target.closest('.category-section');
             if (section) section.classList.add('drag-over');
+        }
+
+        function getDragAfterElement(container, x, y) {
+            const draggableElements = [...container.querySelectorAll('.glass-card:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                // 计算鼠标相对于卡片中心的偏移
+                const offsetX = x - box.left - box.width / 2;
+                const offsetY = y - box.top - box.height / 2;
+                
+                // 简单的距离判断，这里简化为 Y 轴优先，或者综合距离
+                // 为了 grid 这种二维布局，最好使用欧几里得距离
+                const dist = Math.hypot(offsetX, offsetY);
+                
+                if (dist < closest.offset) {
+                    return { offset: dist, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.POSITIVE_INFINITY }).element;
         }
 
         function handleDragLeave(e) {
@@ -415,10 +446,6 @@
                 const oldCat = draggedItem.category;
                 draggedItem.category = targetCategory;
                 
-                // 乐观更新 UI
-                renderGrid();
-                
-                // 后台更新
                 try {
                     await fetch(`/api/sites/${draggedItem.id}`, {
                         method: 'PUT',
@@ -432,27 +459,24 @@
                     });
                 } catch(err) {
                     showMsg('移动失败');
-                    draggedItem.category = oldCat; // 回滚
-                    renderGrid();
+                    draggedItem.category = oldCat;
                 }
             }
             
-            // 2. 处理同分类排序
-            const targetCard = e.target.closest('.glass-card');
-            if (targetCard) {
-                const targetId = parseInt(targetCard.getAttribute('data-id'));
-                if (targetId && targetId !== draggedItem.id) {
-                    const fromIndex = sites.findIndex(s => s.id === draggedItem.id);
-                    const toIndex = sites.findIndex(s => s.id === targetId);
-                    
-                    const [movedItem] = sites.splice(fromIndex, 1);
-                    sites.splice(toIndex, 0, movedItem);
-                    
-                    siteSortOrder = sites.map(s => s.id);
-                    localStorage.setItem('siteSortOrder', JSON.stringify(siteSortOrder));
-                    renderGrid();
-                }
-            }
+            // 2. 保存当前所有卡片的新顺序 (因为 DOM 已经由 handleDragOver 实时更新了)
+            const allCards = document.querySelectorAll('.glass-card');
+            const newOrder = [];
+            allCards.forEach(card => {
+                const id = parseInt(card.getAttribute('data-id'));
+                if (id) newOrder.push(id);
+            });
+            
+            siteSortOrder = newOrder;
+            localStorage.setItem('siteSortOrder', JSON.stringify(siteSortOrder));
+            
+            // 重新加载数据以确保状态同步 (或者直接更新 sites 数组)
+            // 这里简单重新渲染以确保数据结构一致
+            // loadSites(); // 可选：如果觉得卡顿可以注释掉
         }
 
         // === 6. 核心逻辑 ===
@@ -638,7 +662,7 @@
                     card.appendChild(editBtn);
 
                     card.onclick = () => { 
-                        if(isManageMode) return; // 编辑模式下点击卡片无操作
+                        if(isManageMode) return; 
                         window.open(site.url, '_blank'); 
                     };
                     
@@ -651,7 +675,7 @@
                     
                     card.innerHTML = `<div class="card-icon">${iconHtml}</div>`;
                     card.appendChild(infoDiv);
-                    card.appendChild(editBtn); // 重新附加按钮，确保在最上层
+                    card.appendChild(editBtn); 
 
                     grid.appendChild(card);
                 });
