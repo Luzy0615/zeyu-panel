@@ -32,29 +32,57 @@
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 12vh; z-index: 1; }
 
+        /* === 修复 4：绝对垂直居中 === */
         .header-container { 
-            display: flex; align-items: center; justify-content: center; 
-            margin-bottom: 50px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            height: 60px;
+            display: flex; 
+            align-items: center; /* 核心：子元素垂直居中 */
+            justify-content: center; 
+            margin-bottom: 50px; 
+            animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            height: 60px; /* 固定高度以便计算 */
         }
         
         .site-title { 
-            font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; 
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5); line-height: 1; padding-top: 5px; 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            color: #fff; 
+            letter-spacing: -1px; 
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            line-height: 1; /* 防止字体本身的上下留白影响居中 */
+            margin: 0; padding: 0;
+            display: flex; align-items: center; /* 自身内容居中 */
         }
         
-        .separator { width: 3px; height: 40px; background-color: rgba(255, 255, 255, 0.5); margin: 0 25px; border-radius: 2px; }
+        .separator { 
+            width: 3px; 
+            height: 36px; /* 稍微调短一点，视觉更协调 */
+            background-color: rgba(255, 255, 255, 0.5); 
+            margin: 0 25px; 
+            border-radius: 2px; 
+        }
         
-        .time-block { display: flex; flex-direction: column; justify-content: center; height: 100%; }
+        .time-block { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            height: 100%;
+            gap: 2px; /* 时间和日期之间的间距 */
+        }
         
         .clock { 
-            font-size: 2rem; font-weight: 700; line-height: 1; 
-            text-shadow: 0 2px 8px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-bottom: 4px;
+            font-size: 2rem; 
+            font-weight: 700; 
+            line-height: 1; 
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5); 
+            font-variant-numeric: tabular-nums; 
         }
         
         .date { 
-            font-size: 0.9rem; color: rgba(255, 255, 255, 0.85); 
-            font-weight: 400; text-shadow: 0 1px 3px rgba(0,0,0,0.5); line-height: 1;
+            font-size: 0.9rem; 
+            color: rgba(255, 255, 255, 0.85); 
+            font-weight: 400; 
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5); 
+            line-height: 1;
         }
 
         .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
@@ -72,11 +100,33 @@
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; }
-        .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
-        .cat-edit-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; font-size: 12px; color: #ddd; cursor: pointer; display: none; margin-right: 10px; }
-        .cat-edit-btn:hover { background: var(--accent-color); border-color: var(--accent-color); color: white; }
-        body.manage-mode .cat-edit-btn { display: inline-block; animation: popIn 0.3s; }
-        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        .category-title { 
+            font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; 
+            border-left: 4px solid var(--accent-color); 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; 
+            display: flex; align-items: center; justify-content: space-between; 
+        }
+        
+        /* === 修复 3：编辑分类按钮明显化 === */
+        .cat-edit-btn { 
+            background: var(--accent-color); /* 亮色背景 */
+            border: 1px solid rgba(255,255,255,0.3); 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            color: white; 
+            font-weight: 600;
+            cursor: pointer; 
+            display: none; 
+            margin-right: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        .cat-edit-btn:hover { transform: scale(1.05); background: #2993ff; }
+        .cat-edit-btn:active { transform: scale(0.95); }
+        
+        body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
@@ -98,39 +148,32 @@
         
         .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
         
-        /* === 修复点 1：标题不滚动，超出显示省略号 === */
+        /* === 修复 1：PC端字体改小一点点 === */
         .card-title { 
-            font-size: 15px !important; 
+            font-size: 13.5px !important; /* 原来是 15px，改小到 13.5px */
             font-weight: 600; margin-bottom: 4px; color: #fff; 
-            line-height: 1.4;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; /* 静态省略号 */
+            line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
         }
-
-        /* === 修复点 2：描述文字自动滚动 (呼吸式) === */
         .card-desc { 
             font-size: 12px !important; 
             color: rgba(255,255,255,0.7); font-weight: 400; 
-            line-height: 1.4;
-            white-space: nowrap;
-            overflow: hidden;
-            position: relative;
+            line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative;
         }
 
-        .card-desc span {
-            display: inline-block;
-        }
+        .card-desc span { display: inline-block; }
 
-        /* 只有带有 scrolling 类的才会滚动 */
+        /* === 修复 2：滚动动画优化 (停顿->滚动->停顿) === */
         .card-desc.scrolling span {
             animation: scroll-left linear infinite alternate;
+            /* 延迟 1.5秒 开始，让用户先看清开头 */
+            animation-delay: 1.5s; 
         }
 
-        /* 滚动动画：停顿 -> 向左 -> 停顿 -> 向右 */
         @keyframes scroll-left {
+            /* 前 15% 的时间保持静止，避免一刷新就乱动 */
             0%, 15% { transform: translateX(0); }
-            85%, 100% { transform: translateX(var(--scroll-dist)); }
+            /* 滚到底 */
+            100% { transform: translateX(var(--scroll-dist)); }
         }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
@@ -174,6 +217,7 @@
             .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .glass-card { padding: 12px 10px; flex-direction: row; align-items: center; }
             .card-icon { width: 38px; height: 38px; margin-right: 10px; }
+            /* 手机端保持稍微大一点的字号以保证可读性 */
             .card-title { font-size: 14px !important; margin-bottom: 2px; }
             .card-desc { font-size: 11px !important; opacity: 0.8; }
             .modal { width: 90%; }
@@ -346,7 +390,7 @@
                 const section = document.createElement('div'); section.className = 'category-section';
                 
                 const title = document.createElement('div'); title.className = 'category-title'; 
-                title.innerHTML = `<span>${category}</span><button class="cat-edit-btn" onclick="openCatModal('${category}')">编辑分类</button>`;
+                title.innerHTML = `<span>${category}</span><button class="cat-edit-btn" onclick="openCatModal('${category}')">✏️ 编辑分类</button>`;
                 section.appendChild(title);
 
                 const grid = document.createElement('div'); grid.className = 'grid';
@@ -360,7 +404,6 @@
                     
                     const iconHtml = site.icon ? `<img src="${site.icon}" onerror="this.parentElement.innerHTML='${placeholderIcon}'">` : placeholderIcon;
                     
-                    // 动态检测是否需要滚动
                     card.innerHTML = `
                         <div class="card-icon">${iconHtml}</div>
                         <div class="card-info">
@@ -374,18 +417,14 @@
                 container.appendChild(section);
             }
             
-            // === 核心：检测并激活自动滚动 ===
-            // 渲染完成后，检查每个 card-desc 里的 span 宽度
+            // 自动检测文字滚动
             setTimeout(() => {
                 document.querySelectorAll('.card-desc').forEach(desc => {
                     const span = desc.querySelector('span');
                     if (span && span.offsetWidth > desc.offsetWidth) {
-                        // 只有当文字宽度大于容器宽度时，才添加滚动类
                         desc.classList.add('scrolling');
-                        // 动态计算滚动距离
-                        const dist = span.offsetWidth - desc.offsetWidth + 10; // 多滚一点点留白
+                        const dist = span.offsetWidth - desc.offsetWidth + 10;
                         span.style.setProperty('--scroll-dist', `-${dist}px`);
-                        // 根据长度动态调整时间，越长滚得越慢
                         const duration = 2 + (dist / 20); 
                         span.style.animationDuration = `${duration}s`;
                     }
