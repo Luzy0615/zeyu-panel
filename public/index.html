@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeyu Panel Pro</title>
+    <style>
+        /* 保持之前的 V8.0 样式，为了节省篇幅，CSS 样式部分完全不变 */
+        :root { --glass-bg: rgba(0, 0, 0, 0.25); --glass-filter: blur(6px); --glass-border: rgba(255, 255, 255, 0.2); --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); --card-radius: 20px; --text-primary: #ffffff; --accent-color: #0A84FF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; user-select: none; -webkit-font-smoothing: antialiased; }
+        body { background: url('https://api.mmp.cc/api/pcwallpaper?category=cartoon&type=jpg') no-repeat center center fixed; background-size: cover; min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: var(--text-primary); box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.1); overflow-x: hidden; }
+        .dashboard { width: 90%; max-width: 1100px; margin-top: 15vh; margin-bottom: 100px; z-index: 1; }
+        .header-container { display: flex; align-items: center; justify-content: center; margin-bottom: 60px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .site-title { font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .separator { width: 2px; height: 45px; background-color: rgba(255, 255, 255, 0.6); margin: 0 25px; border-radius: 2px; }
+        .time-block { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+        .clock { font-size: 2rem; font-weight: 700; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; }
+        .date { font-size: 0.9rem; color: rgba(255, 255, 255, 0.85); margin-top: 5px; font-weight: 400; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .search-container { position: relative; max-width: 650px; margin: 0 auto 50px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
+        .search-wrapper { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: 35px; padding-right: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .search-wrapper:hover { transform: translateY(-2px); background: rgba(0, 0, 0, 0.5); border-color: rgba(255,255,255,0.4); }
+        .search-wrapper:focus-within { transform: scale(1.02); background: rgba(0, 0, 0, 0.7); border-color: rgba(255,255,255,0.6); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .engine-select { padding: 15px 20px; cursor: pointer; border-right: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+        .engine-icon { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+        .search-input { flex: 1; background: transparent; border: none; padding: 18px 15px; font-size: 17px; color: white; outline: none; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .search-input::placeholder { color: rgba(255, 255, 255, 0.9) !important; opacity: 1; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+        .search-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.9); padding: 12px 20px; cursor: pointer; border-radius: 0 35px 35px 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .search-btn:hover { color: var(--accent-color); transform: scale(1.1); }
+        .search-btn svg { width: 22px; height: 22px; }
+        .engine-dropdown { position: absolute; top: 115%; left: 0; width: 180px; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 18px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .engine-dropdown.show { display: flex; animation: menuPop 0.2s ease-out; }
+        .engine-option { padding: 14px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: white; font-size: 15px; transition: background 0.2s; }
+        .engine-option:hover { background: rgba(255,255,255,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; padding: 10px; }
+        .glass-card { display: flex; align-items: center; padding: 18px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 100%; background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 70%); transform: translateX(-100%); transition: transform 0.5s; pointer-events: none; }
+        .glass-card:hover { transform: translateY(-8px) scale(1.02); background: rgba(0, 0, 0, 0.4); border-color: rgba(255,255,255,0.5); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .glass-card:hover::before { transform: translateX(100%); }
+        .card-icon { width: 52px; height: 52px; border-radius: 14px; margin-right: 15px; background: rgba(255,255,255,0.15); overflow: hidden; flex-shrink: 0; transition: transform 0.3s; }
+        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .glass-card:hover .card-icon { transform: scale(1.1) rotate(-3deg); }
+        .card-info { flex: 1; overflow: hidden; }
+        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 5px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
+        .card-desc { font-size: 13px; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+        .context-menu { position: fixed; z-index: 1000; width: 160px; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 14px; box-shadow: 0 15px 50px rgba(0,0,0,0.7); display: none; flex-direction: column; padding: 8px; animation: menuPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .context-item { padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 10px; transition: background 0.1s; }
+        .context-item:hover { background: var(--accent-color); }
+        .context-item.delete:hover { background: #FF453A; }
+        .fab-btn { position: fixed; bottom: 40px; right: 40px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .fab-btn:hover { transform: scale(1.15) rotate(90deg); box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal { background: #252525; width: 380px; padding: 30px; border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: 0 25px 80px rgba(0,0,0,0.8); transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .input-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; }
+        .input-field { width: 100%; background: #333; border: 1px solid #444; padding: 14px; border-radius: 12px; color: white; outline: none; margin-bottom: 20px; }
+        .input-field:focus { border-color: var(--accent-color); }
+        .modal-btns { display: flex; gap: 15px; }
+        .btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #444; color: #ccc; }
+        .btn-save { background: var(--accent-color); color: white; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardEntrance { from { opacity: 0; transform: translateY(60px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes menuPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @media (max-width: 600px) { .header-container { flex-direction: column; gap: 10px; } .separator { display: none; } .site-title { font-size: 2.5rem; } .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header-container">
+            <div class="site-title">Zeyu-Panel</div>
+            <div class="separator"></div>
+            <div class="time-block">
+                <div class="clock" id="clock">00:00:00</div>
+                <div class="date" id="date">Loading...</div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <div class="search-wrapper">
+                <div class="engine-select" id="engineSelect" onclick="toggleEngineMenu(event)">
+                    <img id="currentEngineIcon" src="" class="engine-icon">
+                </div>
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索..." onkeypress="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="engine-dropdown" id="engineDropdown">
+                <div class="engine-option" onclick="changeEngine('google')"><img src="https://www.google.com/favicon.ico" width="20"> Google</div>
+                <div class="engine-option" onclick="changeEngine('baidu')"><img src="https://www.baidu.com/favicon.ico" width="20"> 百度</div>
+                <div class="engine-option" onclick="changeEngine('bing')"><img src="https://www.bing.com/favicon.ico" width="20"> Bing</div>
+                <div class="engine-option" onclick="changeEngine('bilibili')"><img src="https://www.bilibili.com/favicon.ico" width="20"> Bilibili</div>
+            </div>
+        </div>
+
+        <div class="grid" id="cardGrid"></div>
+    </div>
+
+    <button class="fab-btn" onclick="openAddModal()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+
+    <div id="contextMenu" class="context-menu">
+        <div class="context-item" onclick="handleMenuEdit()"><span>✎</span> 编辑 (Edit)</div>
+        <div class="context-item delete" onclick="handleMenuDelete()"><span>🗑</span> 删除 (Delete)</div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 id="modalTitle" style="color:white; margin-bottom:25px; text-align:center;">Add Shortcut</h3>
+            <div class="input-group"><label>标题</label><input type="text" class="input-field" id="siteTitle"></div>
+            <div class="input-group"><label>描述</label><input type="text" class="input-field" id="siteDesc"></div>
+            <div class="input-group"><label>链接 (URL)</label><input type="text" class="input-field" id="siteUrl"></div>
+            <div class="input-group"><label>图标链接 (可选)</label><input type="text" class="input-field" id="siteIcon"></div>
+            <div class="modal-btns">
+                <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn btn-save" onclick="saveSite()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 1. 核心修改：使用 fetch API 替代 localStorage ===
+        const engines = {
+            google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
+            baidu: { name: '百度', url: 'https://www.baidu.com/s?wd=', icon: 'https://www.baidu.com/favicon.ico' },
+            bing: { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'https://www.bing.com/favicon.ico' },
+            bilibili: { name: 'Bilibili', url: 'https://search.bilibili.com/all?keyword=', icon: 'https://www.bilibili.com/favicon.ico' }
+        };
+        let currentEngine = localStorage.getItem('myEngine') || 'google';
+
+        function initEngine() {
+            const engine = engines[currentEngine];
+            document.getElementById('currentEngineIcon').src = engine.icon;
+            document.getElementById('searchInput').placeholder = `在 ${engine.name} 中搜索...`;
+        }
+        function toggleEngineMenu(e) { e.stopPropagation(); document.getElementById('engineDropdown').classList.toggle('show'); }
+        function changeEngine(key) { currentEngine = key; localStorage.setItem('myEngine', key); initEngine(); }
+
+        let sites = [];
+        const placeholderIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
+
+        // [New] 从服务器加载数据
+        async function loadSites() {
+            try {
+                const res = await fetch('/api/sites');
+                sites = await res.json();
+                renderGrid();
+            } catch (err) { console.error("加载失败", err); }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('cardGrid'); grid.innerHTML = '';
+            sites.forEach((site, index) => {
+                const card = document.createElement('div'); card.className = 'glass-card';
+                card.style.animationDelay = `${index * 0.1}s`; 
+                card.onclick = () => window.location.href = site.url;
+                card.oncontextmenu = (e) => showContextMenu(e, index);
+                const iconHtml = site.icon ? `<img src="${site.icon}" onerror="this.parentElement.innerHTML='${placeholderIcon}'">` : placeholderIcon;
+                card.innerHTML = `<div class="card-icon">${iconHtml}</div><div class="card-info"><div class="card-title">${site.title}</div><div class="card-desc">${site.desc || 'No description'}</div></div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        let contextTargetIndex = -1;
+        function showContextMenu(e, index) {
+            e.preventDefault(); contextTargetIndex = index;
+            const menu = document.getElementById('contextMenu'); menu.style.display = 'flex';
+            let x = e.clientX, y = e.clientY; if (x + 160 > window.innerWidth) x -= 160;
+            menu.style.left = `${x}px`; menu.style.top = `${y}px`;
+        }
+        function hideContextMenu() { document.getElementById('contextMenu').style.display = 'none'; }
+
+        // [New] 删除网站
+        async function handleMenuDelete() {
+            if (contextTargetIndex > -1 && confirm('Delete this?')) {
+                const id = sites[contextTargetIndex].id;
+                await fetch(`/api/sites/${id}`, { method: 'DELETE' });
+                loadSites();
+            }
+            hideContextMenu();
+        }
+
+        function handleMenuEdit() { if (contextTargetIndex > -1) openModal(true, sites[contextTargetIndex]); hideContextMenu(); }
+
+        let isEditing = false, editIndex = -1, editId = -1;
+        function openAddModal() { openModal(false); }
+        function openModal(editMode = false, data = null) {
+            isEditing = editMode; const modal = document.getElementById('modalOverlay'), titleEl = document.getElementById('modalTitle');
+            if (editMode && data) {
+                titleEl.innerText = "Edit Shortcut"; editIndex = contextTargetIndex; editId = data.id;
+                document.getElementById('siteTitle').value = data.title; document.getElementById('siteDesc').value = data.desc;
+                document.getElementById('siteUrl').value = data.url; document.getElementById('siteIcon').value = data.icon;
+            } else {
+                titleEl.innerText = "New Shortcut";
+                ['siteTitle', 'siteDesc', 'siteUrl', 'siteIcon'].forEach(id => document.getElementById(id).value = '');
+            }
+            modal.classList.add('active'); document.getElementById('siteTitle').focus();
+        }
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+        // [New] 保存网站（新增或更新）
+        async function saveSite() {
+            const title = document.getElementById('siteTitle').value.trim();
+            const desc = document.getElementById('siteDesc').value.trim();
+            let url = document.getElementById('siteUrl').value.trim();
+            const icon = document.getElementById('siteIcon').value.trim();
+
+            if (!title || !url) return alert('Need Title & URL');
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            const payload = { title, desc, url, icon };
+
+            if (isEditing && editId > -1) {
+                await fetch(`/api/sites/${editId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                await fetch('/api/sites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            closeModal();
+            loadSites();
+        }
+
+        document.addEventListener('click', () => { hideContextMenu(); document.getElementById('engineDropdown').classList.remove('show'); });
+        function triggerSearch() { const val = document.getElementById('searchInput').value; if (val) window.location.href = engines[currentEngine].url + encodeURIComponent(val); }
+        function handleSearch(e) { if (e.key === 'Enter') triggerSearch(); }
+        
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); 
+            document.getElementById('date').innerText = now.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', weekday: 'long' }).replace(/\//g, '-');
+        }
+        setInterval(updateTime, 1000);
+
+        initEngine(); 
+        loadSites(); // 初始化加载
+        updateTime();
+    </script>
+</body>
+</html>
