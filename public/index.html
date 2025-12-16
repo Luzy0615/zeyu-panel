@@ -111,7 +111,6 @@
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
-        /* === 修复：加载动画 === */
         #gridLoader {
             margin: 60px auto 40px auto; 
             display: flex; justify-content: center; align-items: center;
@@ -287,7 +286,7 @@
 
     <div class="fab-container">
         <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
         <button class="fab-btn secondary" onclick="openUserMenu()" id="userBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -540,10 +539,12 @@
                 // 3. 渲染
                 renderGrid();
                 
+                // 4. 无人工延迟，极速消失
+                
             } catch(e) { 
                 console.error('Sites load error', e); 
             } finally {
-                // 5. 隐藏动画 (无人工延迟，立即消失)
+                // 5. 隐藏动画
                 document.getElementById('gridLoader').style.display = 'none';
                 document.getElementById('cardGrid').style.opacity = '1';
             }
@@ -1050,8 +1051,6 @@
                         } catch(e) {}
                     }
                     
-                    // --- 关键修复开始 ---
-                    // 将 placeholderIcon 中的双引号转义，防止破坏 HTML 结构
                     const safePlaceholder = placeholderIcon.replace(/"/g, '&quot;');
                     
                     const iconHtml = iconSrc 
@@ -1117,7 +1116,14 @@
                 const d = await res.json();
                 if(d.title) document.getElementById('siteTitle').value = d.title;
                 if(d.desc) document.getElementById('siteDesc').value = d.desc;
-                if(d.icon) document.getElementById('siteIcon').value = d.icon;
+                
+                // 自动图标逻辑 (Scheme 1)
+                try {
+                    const domain = new URL(url).hostname;
+                    const autoIconUrl = `https://favicon.im/${domain}`;
+                    document.getElementById('siteIcon').value = d.icon || autoIconUrl;
+                } catch(e) {}
+
                 hideLoading(true, '获取成功');
             } catch(e) {
                 hideLoading(false, '获取失败');
