@@ -78,7 +78,25 @@
         /* 布局 */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
 
-        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; height: 100%; }
+        /* === 修复核心：overflow 改为 visible，允许铅笔图标凸出 === */
+        .glass-card { 
+            display: flex; 
+            align-items: center; 
+            padding: 14px; 
+            background: var(--glass-bg); 
+            backdrop-filter: var(--glass-filter); 
+            -webkit-backdrop-filter: var(--glass-filter); 
+            border: 1px solid var(--glass-border); 
+            border-radius: var(--card-radius); 
+            cursor: pointer; 
+            position: relative; 
+            overflow: visible; /* 关键修复：允许子元素(编辑按钮)溢出 */
+            transition: transform 0.2s, box-shadow 0.2s; 
+            max-width: 100%; 
+            user-select: none; 
+            height: 100%; 
+        }
+        
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
 
@@ -107,11 +125,32 @@
         body.manage-mode .glass-card:hover { transform: none; }
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
         .glass-card.dragging { opacity: 0.5; border: 2px dashed #fff; background: rgba(255,255,255,0.1); }
-        .card-edit-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--accent-color); color: white; border-radius: 50%; font-size: 14px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8); transition: transform 0.2s; }
+        
+        /* === 修复核心：提高编辑按钮层级 === */
+        .card-edit-btn { 
+            position: absolute; 
+            top: -8px; 
+            right: -8px; 
+            width: 24px; 
+            height: 24px; 
+            background: var(--accent-color); 
+            color: white; 
+            border-radius: 50%; 
+            font-size: 14px; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+            cursor: pointer; 
+            z-index: 100; /* 确保在最上层 */
+            border: 2px solid rgba(255,255,255,0.8); 
+            transition: transform 0.2s; 
+        }
+        
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
-        /* === 修复：加载动画 === */
+        /* 加载动画 */
         #gridLoader {
             margin: 60px auto 40px auto; 
             display: flex; justify-content: center; align-items: center;
@@ -541,10 +580,12 @@
                 // 3. 渲染
                 renderGrid();
                 
+                // 4. 无人工延迟，极速消失
+                
             } catch(e) { 
                 console.error('Sites load error', e); 
             } finally {
-                // 4. 隐藏动画 (极速版：无人工延迟)
+                // 5. 隐藏动画
                 document.getElementById('gridLoader').style.display = 'none';
                 document.getElementById('cardGrid').style.opacity = '1';
             }
