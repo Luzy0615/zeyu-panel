@@ -157,7 +157,6 @@
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
 
-        /* 手机端布局强制修复 */
         @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
@@ -328,15 +327,12 @@
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
         let categoryOrder = [];
-        let siteSortOrder = [];
         let currentUserRole = 'guest';
         let sites = [];
         let existingCategories = new Set();
         let contextTargetIndex = -1;
         let isEditing = false, editId = -1;
         let draggedItem = null;
-        let layoutChanged = false;
-        let originalSortOrder = []; 
 
         function initEngine() { document.getElementById('currentEngineIcon').src = engines[currentEngine].icon; }
         function toggleEngineMenu(e) { e.stopPropagation(); document.getElementById('engineDropdown').classList.toggle('show'); }
@@ -434,15 +430,10 @@
         async function handleDrop(e, targetCategory) {
             e.preventDefault();
             if (!isManageMode || !draggedItem) return;
-            
             document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
-            
-            layoutChanged = true;
 
-            // 1. 处理跨分类移动
+            // 1. 跨分类移动：直接更新卡片属性
             if (draggedItem.category !== targetCategory) {
-                const oldCat = draggedItem.category;
-                draggedItem.category = targetCategory;
                 try {
                     await fetch(`/api/sites/${draggedItem.id}`, {
                         method: 'PUT',
@@ -454,51 +445,36 @@
                             category: targetCategory
                         })
                     });
+                    draggedItem.category = targetCategory; // 更新本地状态
                 } catch(err) {
                     showMsg('移动失败');
-                    draggedItem.category = oldCat;
+                    return;
                 }
             }
             
-            // 2. 实时更新本地顺序状态
-            const allCards = document.querySelectorAll('.glass-card');
-            const newOrder = [];
-            allCards.forEach(card => {
+            // 2. 收集当前屏幕上的所有卡片顺序 (所见即所得)
+            const newOrderIds = [];
+            document.querySelectorAll('.glass-card').forEach(card => {
                 const id = parseInt(card.getAttribute('data-id'));
-                if (id) newOrder.push(id);
+                if (id) newOrderIds.push(id);
             });
             
-            siteSortOrder = newOrder;
-            // 3. 立即保存到数据库 (卡片排序)
-            await saveSortToDB();
+            // 3. 立即保存新顺序到云端
+            await saveSortOrderToRemote(newOrderIds);
         }
 
-        // === 需求2：保存排序到数据库 (全端同步) ===
-        async function saveSortToDB() {
+        // === 通用：保存卡片顺序 ===
+        async function saveSortOrderToRemote(orderIds) {
             try {
-                // 1. 保存卡片顺序
-                const sortOrder = sites.map(s => s.id);
-                // 优先使用最新的顺序
-                const finalOrder = siteSortOrder.length > 0 ? siteSortOrder : sortOrder;
-                
                 await fetch('/api/sites/sort', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order: finalOrder }) 
+                    body: JSON.stringify({ order: orderIds })
                 });
-                
-                // 2. 保存分类顺序
-                await fetch('/api/category_order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(categoryOrder)
-                });
-            } catch(e) {
-                console.error('Sort save failed', e);
-            }
+            } catch(e) { console.error('Sort save failed', e); }
         }
 
-        // === 核心功能：保存分类顺序到远程 ===
+        // === 通用：保存分类顺序 ===
         async function saveCategoryOrderToRemote() {
             try {
                 await fetch('/api/category_order', {
@@ -506,7 +482,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(categoryOrder)
                 });
-            } catch(e) { console.error('Cat order save failed', e); }
+            } catch(e) { console.error('Category order save failed', e); }
         }
 
         async function loadSites() {
@@ -514,6 +490,7 @@
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
                 
+                // 此时 /api/sites 应该已经按 sort_order 排序返回了
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
                 let rawSites = await res.json();
@@ -542,34 +519,6 @@
 
         function toggleEditMode() {
             if(currentUserRole !== 'admin') return showMsg('需要管理员权限');
-            
-            if (isManageMode && layoutChanged) {
-                showConfirm('布局已变动，是否保存？', 
-                    async () => { 
-                        layoutChanged = false;
-                        await saveSortToDB(); 
-                        showMsg('布局已保存');
-                        performToggle();
-                    },
-                    () => { 
-                        layoutChanged = false;
-                        siteSortOrder = originalSortOrder; 
-                        loadSites(); 
-                        performToggle();
-                    }
-                );
-                return;
-            }
-
-            if (!isManageMode) {
-                originalSortOrder = [...siteSortOrder];
-                layoutChanged = false;
-            }
-
-            performToggle();
-        }
-
-        function performToggle() {
             isManageMode = !isManageMode;
             document.body.classList.toggle('manage-mode', isManageMode);
             document.getElementById('manageBtn').classList.toggle('active', isManageMode);
@@ -680,16 +629,8 @@
 
             for (const category of keys) {
                 let items = grouped[category];
-                if (siteSortOrder.length > 0) {
-                    items.sort((a, b) => {
-                        let idxA = siteSortOrder.indexOf(a.id);
-                        let idxB = siteSortOrder.indexOf(b.id);
-                        if (idxA === -1) idxA = 99999;
-                        if (idxB === -1) idxB = 99999;
-                        return idxA - idxB;
-                    });
-                }
-
+                // 按照 loadSites 获取到的顺序渲染 (后端已排好序)
+                
                 const section = document.createElement('div'); 
                 section.className = 'category-section';
                 if (isManageMode) {
@@ -810,20 +751,20 @@
         
         function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
         
-        // === 修复：确保无论是否改名，都保存排序 ===
+        // === 核心修复：点击保存分类时，强制同步顺序 ===
         async function saveCategory() { 
-            const o=document.getElementById('editOldCatName').value, n=document.getElementById('editCatName').value; 
+            const o = document.getElementById('editOldCatName').value;
+            const n = document.getElementById('editCatName').value;
             
-            // 1. 如果改名了，先更新名字
-            if(o!==n && n) { 
-                await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); 
-                // 更新本地 categoryOrder 中的名字
-                const i=categoryOrder.indexOf(o); 
-                if(i!==-1) categoryOrder[i]=n; 
+            // 1. 如果改名了，调用API改名，并同步更新 categoryOrder 数组里的名字
+            if(o !== n && n) { 
+                await fetch('/api/category', {method: 'PUT', body: JSON.stringify({oldName: o, newName: n})}); 
+                const idx = categoryOrder.indexOf(o);
+                if (idx !== -1) categoryOrder[idx] = n;
             } 
             
-            // 2. 无论是否改名，只要点击保存，就同步当前的分类顺序到数据库
-            await saveCategoryOrderToRemote(); // 这里是关键修复
+            // 2. 无论是否改名，只要点击保存，就同步整个 categoryOrder 到数据库
+            await saveCategoryOrderToRemote(); 
             
             closeModal('catModalOverlay'); 
             loadSites(); 
@@ -831,13 +772,25 @@
         }
         
         function moveCategory(dir) { 
-            const n=document.getElementById('editOldCatName').value, i=categoryOrder.indexOf(n); 
-            if(i===-1)return; 
-            if(dir==='up'&&i>0)[categoryOrder[i],categoryOrder[i-1]]=[categoryOrder[i-1],categoryOrder[i]]; 
-            else if(dir==='down'&&i<categoryOrder.length-1)[categoryOrder[i],categoryOrder[i+1]]=[categoryOrder[i+1],categoryOrder[i]]; 
+            const n = document.getElementById('editOldCatName').value;
+            const i = categoryOrder.indexOf(n);
             
-            showMsg(dir==='up'?'已上移 (点击保存生效)':'已下移 (点击保存生效)'); 
-            renderGrid(); 
+            if(i === -1) return; 
+            
+            // 1. 交换数组位置
+            if (dir === 'up' && i > 0) {
+                [categoryOrder[i], categoryOrder[i-1]] = [categoryOrder[i-1], categoryOrder[i]];
+            } else if (dir === 'down' && i < categoryOrder.length - 1) {
+                [categoryOrder[i], categoryOrder[i+1]] = [categoryOrder[i+1], categoryOrder[i]];
+            } else {
+                return; // 无法移动
+            }
+            
+            // 2. 立即上传新顺序，并刷新界面
+            saveCategoryOrderToRemote().then(() => {
+                showMsg(dir === 'up' ? '已上移' : '已下移');
+                renderGrid(); 
+            });
         }
         
         function updateTime() { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false }); const w=['日','一','二','三','四','五','六']; document.getElementById('dateDisplay').innerText = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} 星期${w[now.getDay()]}`; }
