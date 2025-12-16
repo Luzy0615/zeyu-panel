@@ -78,7 +78,6 @@
         /* 布局 */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
 
-        /* === 修复核心：overflow 改为 visible，允许铅笔图标凸出 === */
         .glass-card { 
             display: flex; 
             align-items: center; 
@@ -90,13 +89,12 @@
             border-radius: var(--card-radius); 
             cursor: pointer; 
             position: relative; 
-            overflow: visible; /* 关键修复：允许子元素(编辑按钮)溢出 */
+            overflow: visible; /* 允许子元素(编辑按钮)溢出 */
             transition: transform 0.2s, box-shadow 0.2s; 
             max-width: 100%; 
             user-select: none; 
             height: 100%; 
         }
-        
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
 
@@ -126,7 +124,7 @@
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
         .glass-card.dragging { opacity: 0.5; border: 2px dashed #fff; background: rgba(255,255,255,0.1); }
         
-        /* === 修复核心：提高编辑按钮层级 === */
+        /* 修复：提高编辑按钮层级 */
         .card-edit-btn { 
             position: absolute; 
             top: -8px; 
@@ -142,11 +140,10 @@
             justify-content: center; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
             cursor: pointer; 
-            z-index: 100; /* 确保在最上层 */
+            z-index: 100; 
             border: 2px solid rgba(255,255,255,0.8); 
             transition: transform 0.2s; 
         }
-        
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
@@ -196,6 +193,7 @@
         .fab-btn.secondary { width: 48px; height: 48px; background: rgba(50, 50, 50, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
         .fab-btn.secondary.active { background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
         #addBtn { display: none; }
+        #manageBtn { display: none; } /* 默认隐藏管理按钮 */
 
         .context-menu { position: fixed; z-index: 1000; width: 160px; background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.7); display: none; flex-direction: column; padding: 6px; animation: menuPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .context-item { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: #fff; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
@@ -388,13 +386,13 @@
             <h3 style="color:white; margin-bottom:20px; text-align:center;">用户中心</h3>
             <p style="text-align:center; color:#ccc; font-size:1rem; margin-bottom:25px;" id="currentUsernameDisplay">Admin</p>
             
-            <div class="setting-item">
+            <div class="setting-item" id="homeSettingsEntry" style="display:none;">
                 <button class="menu-btn" onclick="openHomeSettings()">
                     <span>🏠 主页设置</span>
                 </button>
             </div>
 
-            <div class="setting-item">
+            <div class="setting-item" id="backupEntry" style="display:none;">
                 <button class="menu-btn" onclick="openBackupModal()">
                     <span>📦 备份与恢复</span>
                 </button>
@@ -579,8 +577,6 @@
                 
                 // 3. 渲染
                 renderGrid();
-                
-                // 4. 无人工延迟，极速消失
                 
             } catch(e) { 
                 console.error('Sites load error', e); 
@@ -851,9 +847,18 @@
 
         function updateUIForRole() {
             const isAdmin = currentUserRole === 'admin';
+            
+            // 核心修复：显式控制管理按钮的显示与隐藏
             document.getElementById('addBtn').style.display = isAdmin ? 'flex' : 'none';
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
+            document.getElementById('manageBtn').style.display = isAdmin ? 'flex' : 'none';
+            
+            // 控制用户中心内的管理入口
+            document.getElementById('homeSettingsEntry').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('backupEntry').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('adminManagerEntry').style.display = isAdmin ? 'block' : 'none';
+            
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
+            
             if(!isAdmin && isManageMode) toggleEditMode();
             renderGrid(); 
         }
