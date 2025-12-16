@@ -23,7 +23,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-stack); -webkit-font-smoothing: antialiased; }
         
         body { 
-            /* 默认背景，JS加载后会被覆盖 */
             background: url('https://t.alcy.cc/ycy') no-repeat center center fixed; 
             background-size: cover; 
             min-height: 100vh; 
@@ -32,7 +31,7 @@
             box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.15); 
             overflow-x: hidden; 
             padding-bottom: 100px; 
-            transition: background-image 0.5s ease; /* 背景切换动画 */
+            transition: background-image 0.5s ease;
         }
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; }
@@ -72,13 +71,10 @@
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        
-        /* 卡片样式 */
         .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
         
-        /* 编辑模式样式 */
         body.manage-mode .glass-card { cursor: move; }
         body.manage-mode .glass-card:hover { transform: none; }
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
@@ -96,7 +92,6 @@
         .card-desc span { display: inline-block; }
         .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
 
-        /* 按钮组 */
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .fab-btn:hover { transform: scale(1.1); }
@@ -129,7 +124,7 @@
         .btn-save { background: var(--accent-color); color: white; }
         .btn-move { flex: 0.5; background: rgba(255, 255, 255, 0.15); font-size: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; }
         
-        /* 设置菜单样式 */
+        /* 菜单样式 */
         .setting-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
         .setting-item:last-child { border-bottom: none; margin-bottom: 0; }
         .menu-btn { width: 100%; text-align: left; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -180,7 +175,7 @@
 <body>
     <div class="dashboard">
         <div class="header-container">
-            <div class="site-title">Zeyu-Panel</div>
+            <div class="site-title" id="siteTitleDisplay">Zeyu-Panel</div>
             <div class="separator"></div>
             <div class="clock" id="clock">00:00:00</div>
         </div>
@@ -251,6 +246,17 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="loadingModalOverlay" style="z-index: 3500;">
+        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                <div id="loadSpinner" class="spinner"></div>
+                <div id="loadSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                <div id="loadError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                <p id="loadText" class="status-text" style="margin-top:15px;">处理中...</p>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="msgModalOverlay" style="z-index: 3000;">
         <div class="modal" style="min-height: auto; padding: 25px; width: 320px; text-align: center;">
             <div style="margin-bottom: 20px; font-size: 16px; color: #fff;" id="msgContent"></div>
@@ -267,13 +273,9 @@
             <p style="text-align:center; color:#ccc; font-size:1rem; margin-bottom:25px;" id="currentUsernameDisplay">Admin</p>
             
             <div class="setting-item">
-                <div class="input-group">
-                    <label>背景图片 API</label>
-                    <div class="url-input-wrapper">
-                        <input type="text" class="input-field" id="bgApiInput" placeholder="输入图片URL或API接口">
-                        <button class="btn-get" onclick="saveBackground()">保存</button>
-                    </div>
-                </div>
+                <button class="menu-btn" onclick="openHomeSettings()">
+                    <span>🏠 主页设置</span>
+                </button>
             </div>
 
             <div id="adminManagerEntry" style="display:none; margin-bottom:20px;">
@@ -289,23 +291,30 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="homeSettingsModalOverlay" style="z-index: 2200;">
+        <div class="modal">
+            <h3 style="color:white; margin-bottom:20px; text-align:center;">主页设置</h3>
+            <div class="input-group">
+                <label>网页名称</label>
+                <input type="text" class="input-field" id="siteNameInput" placeholder="默认: Zeyu-Panel">
+            </div>
+            <div class="input-group">
+                <label>背景图片 API</label>
+                <input type="text" class="input-field" id="bgApiInput" placeholder="输入图片URL或API接口">
+            </div>
+            <div class="modal-btns">
+                <button class="btn btn-cancel" onclick="closeModal('homeSettingsModalOverlay')">取消</button>
+                <button class="btn btn-save" onclick="saveHomeSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="userManageModalOverlay" style="z-index: 2100;">
         <div class="modal">
             <h3 style="color:white; margin-bottom:20px; text-align:center;">用户权限管理</h3>
             <div id="userListContainer">Loading...</div>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('userManageModalOverlay')">返回</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="loadingModalOverlay" style="z-index: 3500;">
-        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
-                <div id="loadSpinner" class="spinner"></div>
-                <div id="loadSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <div id="loadError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
-                <p id="loadText" class="status-text" style="margin-top:15px;">处理中...</p>
             </div>
         </div>
     </div>
@@ -403,7 +412,6 @@
             }, 1000);
         }
 
-        // === 拖拽逻辑 (DOM优先策略) ===
         function handleDragStart(e, id) {
             if (!isManageMode) return;
             draggedItem = sites.find(s => s.id === id);
@@ -486,7 +494,7 @@
                 }
             });
 
-            sites = newSitesArray; // 同步更新内存
+            sites = newSitesArray;
 
             try {
                 await fetch('/api/batch_update', {
@@ -511,7 +519,6 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        // === 加载配置 (背景图 + 分类顺序) ===
         async function loadConfig() {
             try {
                 // 加载背景
@@ -522,31 +529,59 @@
                     document.getElementById('bgApiInput').value = bgData.value;
                 }
 
+                // 加载标题
+                const titleRes = await fetch('/api/config?key=site_title');
+                const titleData = await titleRes.json();
+                if (titleData && titleData.value) {
+                    document.title = titleData.value;
+                    document.getElementById('siteTitleDisplay').innerText = titleData.value;
+                    document.getElementById('siteNameInput').value = titleData.value;
+                }
+
                 // 加载分类顺序
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
             } catch(e) { console.error('Config load error', e); }
         }
 
-        async function saveBackground() {
-            const url = document.getElementById('bgApiInput').value;
-            if(!url) return showMsg('请输入URL');
-            
-            document.body.style.backgroundImage = `url('${url}')`;
-            
+        function openHomeSettings() {
+            closeModal('userProfileModalOverlay');
+            document.getElementById('homeSettingsModalOverlay').classList.add('active');
+        }
+
+        async function saveHomeSettings() {
+            const title = document.getElementById('siteNameInput').value || 'Zeyu-Panel';
+            const bgUrl = document.getElementById('bgApiInput').value;
+
             try {
+                // 保存标题
                 await fetch('/api/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: 'background_api', value: url })
+                    body: JSON.stringify({ key: 'site_title', value: title })
                 });
-                showMsg('背景已保存');
-            } catch(e) { showMsg('保存失败'); }
+                document.title = title;
+                document.getElementById('siteTitleDisplay').innerText = title;
+
+                // 保存背景
+                if (bgUrl) {
+                    await fetch('/api/config', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: 'background_api', value: bgUrl })
+                    });
+                    document.body.style.backgroundImage = `url('${bgUrl}')`;
+                }
+
+                showMsg('设置已保存');
+                closeModal('homeSettingsModalOverlay');
+            } catch(e) {
+                showMsg('保存失败');
+            }
         }
 
         async function loadSites() {
             try {
-                // 并行加载配置和站点
                 await loadConfig();
                 
                 const res = await fetch('/api/sites');
@@ -572,10 +607,7 @@
             const isAdmin = currentUserRole === 'admin';
             document.getElementById('addBtn').style.display = isAdmin ? 'flex' : 'none';
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
-            
-            // 显示/隐藏用户管理入口
             document.getElementById('adminManagerEntry').style.display = isAdmin ? 'block' : 'none';
-            
             if(!isAdmin && isManageMode) toggleEditMode();
         }
 
@@ -600,9 +632,8 @@
             }
         }
 
-        // 打开二级用户管理页面
         function openAdminSubPage() {
-            closeModal('userProfileModalOverlay'); // 关闭一级弹窗
+            closeModal('userProfileModalOverlay');
             document.getElementById('userManageModalOverlay').classList.add('active');
             loadUserList();
         }
