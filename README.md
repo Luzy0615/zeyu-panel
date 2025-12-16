@@ -1,4 +1,5 @@
-#Zeyu Panel - 极简个人导航面板Zeyu Panel 是一个基于 **Cloudflare Pages** 全栈部署的轻量级个人导航面板。它集成了前端界面与 Serverless 后端，利用 Cloudflare D1 数据库存储数据，无需购买服务器，免费且速度极快。
+#Zeyu Panel - 极简个人导航面板
+Zeyu Panel 是一个基于 **Cloudflare Pages** 全栈部署的轻量级个人导航面板。它集成了前端界面与 Serverless 后端，利用 Cloudflare D1 数据库存储数据，无需购买服务器，免费且速度极快。
 
 *(建议在此处替换为你实际的面板截图)*
 
