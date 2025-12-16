@@ -111,6 +111,7 @@
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
+        /* === 修复：加载动画 === */
         #gridLoader {
             margin: 60px auto 40px auto; 
             display: flex; justify-content: center; align-items: center;
@@ -438,7 +439,7 @@
         <div class="modal">
             <h3 id="modalTitle" style="color:white; margin-bottom:20px; text-align:center;">添加网站</h3>
             <div class="input-group"><label>分类</label><input type="text" class="input-field" id="siteCategory" list="catList" placeholder="输入或选择分类"> <datalist id="catList"></datalist></div>
-            <div class="input-group"><label>链接</label><div class="url-input-wrapper"><input type="text" class="input-field" id="siteUrl" placeholder="https://example.com"><button class="btn-get" id="btnGetInfo" onclick="fetchSiteInfo()">获取</button></div></div>
+            <div class="input-group"><label>链接</label><div class="url-input-wrapper"><input type="text" class="input-field" id="siteUrl" placeholder="https://example.com"><button class="btn-get" id="btnGetInfo" onclick="fetchSiteMeta()">获取详情</button></div></div>
             <div class="input-group">
                 <label>打开方式</label>
                 <select class="input-field" id="siteTarget">
@@ -451,6 +452,7 @@
             <div class="input-group"><label>图标</label>
                 <div class="url-input-wrapper">
                     <input type="text" class="input-field" id="siteIcon" placeholder="留空自动获取">
+                    <button class="btn-get" onclick="fetchIconFromApi()">自动</button>
                     <input type="file" id="iconUploadInput" accept="image/*" style="display:none" onchange="handleIconUpload(event)">
                     <button class="btn-get" onclick="document.getElementById('iconUploadInput').click()">上传</button>
                 </div>
@@ -539,12 +541,10 @@
                 // 3. 渲染
                 renderGrid();
                 
-                // 4. 无人工延迟，极速消失
-                
             } catch(e) { 
                 console.error('Sites load error', e); 
             } finally {
-                // 5. 隐藏动画
+                // 4. 隐藏动画 (极速版：无人工延迟)
                 document.getElementById('gridLoader').style.display = 'none';
                 document.getElementById('cardGrid').style.opacity = '1';
             }
@@ -1043,16 +1043,13 @@
                     card.oncontextmenu = (e) => showContextMenu(e, originalIndex);
                     
                     // 自动图标逻辑 (Scheme 1) - 修复版
+                    // 如果数据库里有值，就用数据库的；如果没有，保持为空 (因为我们把placeholderIcon移到onerror里了)
                     let iconSrc = site.icon;
-                    if (!iconSrc && site.url) {
-                        try {
-                            const domain = new URL(site.url).hostname;
-                            iconSrc = `https://favicon.im/${domain}`;
-                        } catch(e) {}
-                    }
                     
+                    // 转义 SVG 引号，防止 HTML 注入
                     const safePlaceholder = placeholderIcon.replace(/"/g, '&quot;');
                     
+                    // 如果有 iconSrc，直接用；如果没有，src设为空字符串，触发 onerror 显示 placeholder
                     const iconHtml = iconSrc 
                         ? `<img src="${iconSrc}" onerror="this.parentElement.innerHTML='${safePlaceholder}'">` 
                         : placeholderIcon;
@@ -1107,7 +1104,8 @@
             reader.readAsDataURL(file);
         }
 
-        async function fetchSiteInfo() { 
+        // 分离出来的获取元数据函数 (只获取标题描述)
+        async function fetchSiteMeta() { 
             const url = document.getElementById('siteUrl').value;
             if(!url) return showMsg('请输入链接'); 
             showLoading('正在获取信息...');
@@ -1116,17 +1114,23 @@
                 const d = await res.json();
                 if(d.title) document.getElementById('siteTitle').value = d.title;
                 if(d.desc) document.getElementById('siteDesc').value = d.desc;
-                
-                // 自动图标逻辑 (Scheme 1)
-                try {
-                    const domain = new URL(url).hostname;
-                    const autoIconUrl = `https://favicon.im/${domain}`;
-                    document.getElementById('siteIcon').value = d.icon || autoIconUrl;
-                } catch(e) {}
-
-                hideLoading(true, '获取成功');
+                // 注意：这里不再自动填充 icon
+                hideLoading(true, '信息已获取');
             } catch(e) {
                 hideLoading(false, '获取失败');
+            }
+        }
+
+        // 新增：自动获取图标函数 (前端逻辑)
+        function fetchIconFromApi() {
+            const url = document.getElementById('siteUrl').value;
+            if(!url) return showMsg('请先填写链接');
+            try {
+                const domain = new URL(url).hostname;
+                document.getElementById('siteIcon').value = `https://favicon.im/${domain}`;
+                showMsg('图标链接已生成');
+            } catch(e) {
+                showMsg('链接格式错误');
             }
         }
         
