@@ -19,7 +19,7 @@
             --font-stack: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         
-        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; height: 100%; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-stack); -webkit-font-smoothing: antialiased; }
         
         body { 
@@ -30,11 +30,25 @@
             color: var(--text-primary); 
             box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.15); 
             overflow-x: hidden; 
-            padding-bottom: 100px; 
+            /* padding-bottom removed here, handled by footer margin */
             transition: background-image 0.5s ease;
         }
 
-        .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; }
+        .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; flex: 1; /* 让内容撑开，把页脚挤到底部 */ }
+
+        /* 页脚样式 */
+        .site-footer {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            margin-top: 40px;
+            margin-bottom: 80px; /* 留出空间给 FAB 按钮 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .site-footer a { color: rgba(255, 255, 255, 0.8); text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.3); }
+        .site-footer a:hover { color: #fff; border-bottom-style: solid; }
 
         /* 头部 */
         .header-container { display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 5px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -71,16 +85,29 @@
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        
+        /* 卡片样式 */
         .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
         
+        /* 编辑模式样式 */
         body.manage-mode .glass-card { cursor: move; }
         body.manage-mode .glass-card:hover { transform: none; }
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
         .glass-card.dragging { opacity: 0.5; border: 2px dashed #fff; background: rgba(255,255,255,0.1); }
 
-        .card-edit-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--accent-color); color: white; border-radius: 50%; font-size: 14px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8); transition: transform 0.2s; }
+        /* 卡片右上角编辑按钮 */
+        .card-edit-btn { 
+            position: absolute; top: -8px; right: -8px; 
+            width: 24px; height: 24px; 
+            background: var(--accent-color); color: white; 
+            border-radius: 50%; font-size: 14px; 
+            display: none; align-items: center; justify-content: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+            cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8);
+            transition: transform 0.2s;
+        }
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
@@ -92,6 +119,7 @@
         .card-desc span { display: inline-block; }
         .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
 
+        /* 按钮组 */
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .fab-btn:hover { transform: scale(1.1); }
@@ -124,6 +152,7 @@
         .btn-save { background: var(--accent-color); color: white; }
         .btn-move { flex: 0.5; background: rgba(255, 255, 255, 0.15); font-size: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; }
         
+        /* 菜单样式 */
         .setting-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
         .setting-item:last-child { border-bottom: none; margin-bottom: 0; }
         .menu-btn { width: 100%; text-align: left; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -207,6 +236,8 @@
         <div id="cardGrid"></div>
     </div>
 
+    <footer class="site-footer" id="siteFooterDisplay"></footer>
+
     <div class="fab-container">
         <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -241,6 +272,17 @@
                 <div id="loginSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                 <div id="loginError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
                 <p class="status-text" id="loginStatusText">正在登录...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loadingModalOverlay" style="z-index: 3500;">
+        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                <div id="loadSpinner" class="spinner"></div>
+                <div id="loadSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                <div id="loadError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                <p id="loadText" class="status-text" style="margin-top:15px;">处理中...</p>
             </div>
         </div>
     </div>
@@ -290,6 +332,10 @@
                 <label>背景图片 API</label>
                 <input type="text" class="input-field" id="bgApiInput" placeholder="输入图片URL或API接口">
             </div>
+            <div class="input-group">
+                <label>自定义页脚 (支持 HTML)</label>
+                <input type="text" class="input-field" id="siteFooterInput" placeholder="例如: © 2024 Zeyu Panel">
+            </div>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('homeSettingsModalOverlay')">取消</button>
                 <button class="btn btn-save" onclick="saveHomeSettings()">保存</button>
@@ -303,17 +349,6 @@
             <div id="userListContainer">Loading...</div>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('userManageModalOverlay')">返回</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="loadingModalOverlay" style="z-index: 3500;">
-        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
-                <div id="loadSpinner" class="spinner"></div>
-                <div id="loadSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <div id="loadError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
-                <p id="loadText" class="status-text" style="margin-top:15px;">处理中...</p>
             </div>
         </div>
     </div>
@@ -518,10 +553,9 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        // === 3. 加载逻辑更新 ===
         async function loadConfig() {
             try {
-                // 加载背景
+                // 背景
                 const bgRes = await fetch('/api/config?key=background_api');
                 const bgData = await bgRes.json();
                 if (bgData && bgData.value) {
@@ -529,18 +563,22 @@
                     document.getElementById('bgApiInput').value = bgData.value;
                 }
 
-                // 加载标题
+                // 标题
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
-                // 默认值为 "Zeyu Panel"
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
-                
-                // 同时修改两个地方
                 document.title = title;
                 document.getElementById('siteTitleDisplay').innerText = title;
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
-                // 加载分类顺序
+                // 页脚 (新增)
+                const footerRes = await fetch('/api/config?key=site_footer');
+                const footerData = await footerRes.json();
+                const footerText = (footerData && footerData.value) ? footerData.value : '';
+                document.getElementById('siteFooterDisplay').innerHTML = footerText;
+                document.getElementById('siteFooterInput').value = footerText;
+
+                // 分类
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
             } catch(e) { console.error('Config load error', e); }
@@ -554,6 +592,7 @@
         async function saveHomeSettings() {
             const title = document.getElementById('siteNameInput').value || 'Zeyu Panel';
             const bgUrl = document.getElementById('bgApiInput').value;
+            const footer = document.getElementById('siteFooterInput').value; // 新增
 
             try {
                 // 保存标题
@@ -562,8 +601,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key: 'site_title', value: title })
                 });
-                
-                // 立即更新 UI
                 document.title = title;
                 document.getElementById('siteTitleDisplay').innerText = title;
 
@@ -576,6 +613,14 @@
                     });
                     document.body.style.backgroundImage = `url('${bgUrl}')`;
                 }
+
+                // 保存页脚
+                await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'site_footer', value: footer })
+                });
+                document.getElementById('siteFooterDisplay').innerHTML = footer;
 
                 showMsg('设置已保存');
                 closeModal('homeSettingsModalOverlay');
