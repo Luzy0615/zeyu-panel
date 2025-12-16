@@ -329,7 +329,6 @@
         let categoryOrder = [];
         let currentUserRole = 'guest';
         let sites = [];
-        let existingCategories = new Set();
         let contextTargetIndex = -1;
         let isEditing = false, editId = -1;
         let draggedItem = null;
@@ -346,16 +345,12 @@
             document.getElementById('msgOkBtn').onclick = () => closeModal('msgModalOverlay');
             document.getElementById('msgModalOverlay').classList.add('active');
         }
-        function showConfirm(text, onConfirm, onCancel) {
+        function showConfirm(text, onConfirm) {
             document.getElementById('msgContent').innerText = text;
             document.getElementById('msgCancelBtn').style.display = 'block';
             document.getElementById('msgOkBtn').onclick = () => {
                 closeModal('msgModalOverlay');
                 onConfirm();
-            };
-            document.getElementById('msgCancelBtn').onclick = () => {
-                closeModal('msgModalOverlay');
-                if (onCancel) onCancel();
             };
             document.getElementById('msgModalOverlay').classList.add('active');
         }
@@ -427,14 +422,16 @@
             if (section) section.classList.remove('drag-over');
         }
 
+        // === 拖拽保存逻辑 (卡片) ===
         async function handleDrop(e, targetCategory) {
             e.preventDefault();
             if (!isManageMode || !draggedItem) return;
             document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
 
-            // 1. 跨分类移动：直接更新卡片属性
+            // 1. 如果跨分类，更新分类属性
             if (draggedItem.category !== targetCategory) {
                 try {
+                    // 更新数据库中的分类
                     await fetch(`/api/sites/${draggedItem.id}`, {
                         method: 'PUT',
                         body: JSON.stringify({
@@ -445,14 +442,14 @@
                             category: targetCategory
                         })
                     });
-                    draggedItem.category = targetCategory; // 更新本地状态
+                    draggedItem.category = targetCategory; // 更新本地内存
                 } catch(err) {
-                    showMsg('移动失败');
+                    showMsg('移动失败，请重试');
                     return;
                 }
             }
             
-            // 2. 收集当前屏幕上的所有卡片顺序 (所见即所得)
+            // 2. 获取当前 DOM 中所有卡片的顺序 (全局排序)
             const newOrderIds = [];
             document.querySelectorAll('.glass-card').forEach(card => {
                 const id = parseInt(card.getAttribute('data-id'));
@@ -463,7 +460,7 @@
             await saveSortOrderToRemote(newOrderIds);
         }
 
-        // === 通用：保存卡片顺序 ===
+        // === API: 保存卡片顺序 ===
         async function saveSortOrderToRemote(orderIds) {
             try {
                 await fetch('/api/sites/sort', {
@@ -474,7 +471,7 @@
             } catch(e) { console.error('Sort save failed', e); }
         }
 
-        // === 通用：保存分类顺序 ===
+        // === API: 保存分类顺序 ===
         async function saveCategoryOrderToRemote() {
             try {
                 await fetch('/api/category_order', {
@@ -487,10 +484,11 @@
 
         async function loadSites() {
             try {
+                // 1. 加载分类顺序
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
                 
-                // 此时 /api/sites 应该已经按 sort_order 排序返回了
+                // 2. 加载网站数据 (后端应按 sort_order 排序返回)
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
                 let rawSites = await res.json();
@@ -609,9 +607,11 @@
 
         function renderGrid() {
             const container = document.getElementById('cardGrid'); container.innerHTML = '';
-            existingCategories.clear(); const catList = document.getElementById('catList'); catList.innerHTML = '';
+            const existingCategories = new Set();
+            const catList = document.getElementById('catList'); catList.innerHTML = '';
             const grouped = {};
             
+            // 数据分组
             sites.forEach(site => {
                 const cat = site.category || '默认分类';
                 if (!grouped[cat]) grouped[cat] = [];
@@ -619,8 +619,10 @@
                 existingCategories.add(cat);
             });
             
+            // 填充下拉列表
             Array.from(existingCategories).sort().forEach(cat => { const opt = document.createElement('option'); opt.value = cat; catList.appendChild(opt); });
             
+            // 分类排序 (核心：根据 categoryOrder 数组决定渲染顺序)
             let keys = Object.keys(grouped).sort((a, b) => {
                 let indexA = categoryOrder.indexOf(a), indexB = categoryOrder.indexOf(b);
                 if (indexA === -1) indexA = 9999; if (indexB === -1) indexB = 9999;
@@ -629,7 +631,7 @@
 
             for (const category of keys) {
                 let items = grouped[category];
-                // 按照 loadSites 获取到的顺序渲染 (后端已排好序)
+                // 此时 items 已经是按后端 sort_order 排好的，无需再排
                 
                 const section = document.createElement('div'); 
                 section.className = 'category-section';
@@ -751,19 +753,18 @@
         
         function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
         
-        // === 核心修复：点击保存分类时，强制同步顺序 ===
+        // === 修复：分类重命名 + 立即保存排序 ===
         async function saveCategory() { 
-            const o = document.getElementById('editOldCatName').value;
-            const n = document.getElementById('editCatName').value;
+            const o=document.getElementById('editOldCatName').value, n=document.getElementById('editCatName').value; 
             
-            // 1. 如果改名了，调用API改名，并同步更新 categoryOrder 数组里的名字
-            if(o !== n && n) { 
-                await fetch('/api/category', {method: 'PUT', body: JSON.stringify({oldName: o, newName: n})}); 
-                const idx = categoryOrder.indexOf(o);
-                if (idx !== -1) categoryOrder[idx] = n;
+            // 1. 改名逻辑
+            if(o!==n && n) { 
+                await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); 
+                const i=categoryOrder.indexOf(o); 
+                if(i!==-1) categoryOrder[i]=n; 
             } 
             
-            // 2. 无论是否改名，只要点击保存，就同步整个 categoryOrder 到数据库
+            // 2. 立即上传最新顺序
             await saveCategoryOrderToRemote(); 
             
             closeModal('catModalOverlay'); 
@@ -771,24 +772,24 @@
             showMsg('分类已更新'); 
         }
         
+        // === 修复：分类上移下移 + 立即保存排序 ===
         function moveCategory(dir) { 
-            const n = document.getElementById('editOldCatName').value;
-            const i = categoryOrder.indexOf(n);
+            const n=document.getElementById('editOldCatName').value;
+            const i=categoryOrder.indexOf(n); 
             
-            if(i === -1) return; 
+            if(i===-1) return; 
             
-            // 1. 交换数组位置
-            if (dir === 'up' && i > 0) {
+            if(dir==='up' && i>0) {
                 [categoryOrder[i], categoryOrder[i-1]] = [categoryOrder[i-1], categoryOrder[i]];
-            } else if (dir === 'down' && i < categoryOrder.length - 1) {
+            } else if(dir==='down' && i<categoryOrder.length-1) {
                 [categoryOrder[i], categoryOrder[i+1]] = [categoryOrder[i+1], categoryOrder[i]];
             } else {
                 return; // 无法移动
             }
             
-            // 2. 立即上传新顺序，并刷新界面
+            // 关键：移动后立即上传
             saveCategoryOrderToRemote().then(() => {
-                showMsg(dir === 'up' ? '已上移' : '已下移');
+                showMsg(dir==='up'?'已上移':'已下移'); 
                 renderGrid(); 
             });
         }
