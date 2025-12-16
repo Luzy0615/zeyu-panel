@@ -1,6 +1,6 @@
 /**
  * functions/api/sites/[id].js
- * 处理单个站点的修改 (PUT) 和 删除 (DELETE)
+ * V72.0 修复：编辑卡片时，正确更新 target (打开方式)
  */
 export async function onRequestPut(context) {
   const { request, env, params } = context;
@@ -8,13 +8,13 @@ export async function onRequestPut(context) {
 
   try {
     const body = await request.json();
+    // 确保接收 target 字段
     const { title, url, desc, icon, category, target } = body;
 
-    // 动态构建 SQL，只更新前端发来的字段
-    // 这里为了简便，我们假设前端编辑时会发送所有字段
-    // 如果 target 为空，默认为 _self
+    // 如果前端传来的 target 为空，兜底为 _self
     const finalTarget = target || '_self';
 
+    // 执行 SQL 更新
     await env.DB.prepare(
       "UPDATE sites SET title=?, url=?, desc=?, icon=?, category=?, target=? WHERE id=?"
     ).bind(title, url, desc, icon, category, finalTarget, id).run();
