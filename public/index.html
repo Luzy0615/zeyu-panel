@@ -157,6 +157,7 @@
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
 
+        /* 手机端布局强制修复 */
         @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
@@ -377,7 +378,6 @@
             }, 1000);
         }
 
-        // === 拖拽逻辑 (DOM优先策略) ===
         function handleDragStart(e, id) {
             if (!isManageMode) return;
             draggedItem = sites.find(s => s.id === id);
@@ -428,7 +428,7 @@
             if (section) section.classList.remove('drag-over');
         }
 
-        // === 核心：拖拽松手后，立即计算顺序并全量更新 ===
+        // === 核心修复：拖拽结束立即上传新顺序 ===
         async function handleDrop(e, targetCategory) {
             e.preventDefault();
             if (!isManageMode || !draggedItem) return;
@@ -446,12 +446,11 @@
                 const section = card.closest('.category-section');
                 let category = '默认分类';
                 if (section) {
-                    // 从标题里提取分类名 (去除编辑按钮等杂质)
                     const titleSpan = section.querySelector('.category-title span');
                     if (titleSpan) category = titleSpan.innerText;
                 }
                 
-                // 构造更新数据，sort_order 直接用数组下标 index
+                // 构造更新数据
                 payload.push({
                     id: id,
                     sort_order: index,
@@ -480,10 +479,11 @@
             } catch (err) {
                 console.error("Drop save failed", err);
                 showMsg('保存失败，请检查网络');
+                loadSites(); // 失败则回滚
             }
         }
 
-        // === 核心：分类排序保存 ===
+        // === 核心修复：分类排序保存 ===
         async function saveCategoryOrderToRemote() {
             try {
                 await fetch('/api/category_order', {
@@ -496,11 +496,9 @@
 
         async function loadSites() {
             try {
-                // 1. 获取分类顺序
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
                 
-                // 2. 获取站点 (后端已按 sort_order 排序)
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
                 let rawSites = await res.json();
@@ -622,29 +620,35 @@
             existingCategories.clear(); const catList = document.getElementById('catList'); catList.innerHTML = '';
             const grouped = {};
             
-            // 数据分组
+            // 1. 确保所有出现的分类都在 categoryOrder 中
             sites.forEach(site => {
                 const cat = site.category || '默认分类';
                 if (!grouped[cat]) grouped[cat] = [];
                 grouped[cat].push(site); 
                 existingCategories.add(cat);
             });
-            
+
             // 填充下拉列表
             Array.from(existingCategories).sort().forEach(cat => { const opt = document.createElement('option'); opt.value = cat; catList.appendChild(opt); });
-            
-            // 决定分类渲染顺序
-            let keys = Object.keys(grouped).sort((a, b) => {
-                let indexA = categoryOrder.indexOf(a), indexB = categoryOrder.indexOf(b);
-                // 如果是新分类（不在排序列表里），默认放最后
-                if (indexA === -1) indexA = 9999; 
-                if (indexB === -1) indexB = 9999;
-                return indexA - indexB;
+
+            // **关键修复**：每次渲染前，把数据库没记录的新分类，临时加到排序列表末尾，防止它们无法被排序
+            const activeCats = Object.keys(grouped);
+            activeCats.forEach(cat => {
+                if (!categoryOrder.includes(cat)) {
+                    categoryOrder.push(cat);
+                }
+            });
+            // 同时清理掉已经不存在的分类（可选，防止列表无限膨胀）
+            categoryOrder = categoryOrder.filter(c => activeCats.includes(c));
+
+            // 2. 根据 categoryOrder 决定渲染顺序
+            let keys = activeCats.sort((a, b) => {
+                return categoryOrder.indexOf(a) - categoryOrder.indexOf(b);
             });
 
             for (const category of keys) {
                 let items = grouped[category];
-                // 此时 items 已经按 sort_order 排序（因为 sites 数组本身是有序的）
+                // 此时 items 已经是按 sort_order 排序（因为 sites 是按 sort_order 获取的）
                 
                 const section = document.createElement('div'); 
                 section.className = 'category-section';
@@ -766,7 +770,7 @@
         
         function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
         
-        // === 核心：分类改名与排序同步 ===
+        // === 修复：分类重命名 + 立即保存排序 ===
         async function saveCategory() { 
             const o = document.getElementById('editOldCatName').value;
             const n = document.getElementById('editCatName').value;
@@ -777,7 +781,7 @@
                 if (idx !== -1) categoryOrder[idx] = n;
             } 
             
-            // 不论是否改名，都保存一下顺序（万一之前有移动未保存）
+            // 立即上传
             await saveCategoryOrderToRemote(); 
             
             closeModal('catModalOverlay'); 
@@ -785,25 +789,26 @@
             showMsg('分类已更新'); 
         }
         
-        // === 核心修复：点击按钮立即保存分类顺序 ===
+        // === 修复：分类排序按钮立即上传 ===
         function moveCategory(dir) { 
             const n = document.getElementById('editOldCatName').value;
             const i = categoryOrder.indexOf(n);
             
-            if(i === -1) return; 
+            if(i === -1) return; // 可能是新分类，但在 renderGrid 里已经自动加进去了，所以理论上不会-1
             
-            if(dir==='up' && i>0) {
+            // 交换位置
+            if (dir === 'up' && i > 0) {
                 [categoryOrder[i], categoryOrder[i-1]] = [categoryOrder[i-1], categoryOrder[i]];
-            } else if(dir==='down' && i<categoryOrder.length-1) {
+            } else if (dir === 'down' && i < categoryOrder.length - 1) {
                 [categoryOrder[i], categoryOrder[i+1]] = [categoryOrder[i+1], categoryOrder[i]];
             } else {
                 return; // 移不动
             }
             
-            // 立即上传
+            // 立即上传新顺序，并刷新界面
             saveCategoryOrderToRemote().then(() => {
-                showMsg(dir==='up'?'已上移':'已下移'); 
-                renderGrid(); // 重新渲染界面
+                showMsg(dir === 'up' ? '已上移' : '已下移');
+                renderGrid(); 
             });
         }
         
