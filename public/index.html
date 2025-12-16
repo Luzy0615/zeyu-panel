@@ -74,17 +74,9 @@
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
-        /* === 布局核心 CSS === */
-        
-        /* 1. 电脑端 (Desktop)：保持您满意的一行5个 */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
-            gap: 15px; 
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
 
-        /* 2. 手机端 (Mobile)：修复版 */
-        @media (max-width: 768px) { 
+        @media (max-width: 600px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
             .site-title { font-size: 2.5rem; margin-top: 0; }
@@ -96,41 +88,11 @@
             .engine-icon { width: 20px; height: 20px; }
             .search-btn { padding: 0 14px; height: 44px; }
             
-            /* 强制双列，且间距紧凑 */
-            .grid { 
-                grid-template-columns: 1fr 1fr !important; /* 强制两列 */
-                gap: 8px !important; 
-            }
-            
-            .glass-card { 
-                padding: 10px !important; 
-                min-width: 0; 
-            }
-            
-            .card-icon { 
-                width: 32px !important; 
-                height: 32px !important; 
-                margin-right: 8px !important; 
-            }
-            
-            /* 文字限制：禁止换行，强制省略号，防止卡片变高 */
-            .card-title { 
-                font-size: 13px !important; 
-                margin-bottom: 2px;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-            }
-            
-            .card-desc { 
-                font-size: 11px !important; 
-                opacity: 0.8;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                display: block !important; 
-            }
-            
+            .grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+            .glass-card { padding: 10px !important; min-width: 0; }
+            .card-icon { width: 32px !important; height: 32px !important; margin-right: 8px !important; }
+            .card-title { font-size: 13px !important; margin-bottom: 2px; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+            .card-desc { font-size: 11px !important; opacity: 0.8; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; display: block !important; }
             .modal { width: 90%; }
             .category-title { font-size: 1rem; margin-top: 25px; }
         }
@@ -146,14 +108,6 @@
         .card-edit-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--accent-color); color: white; border-radius: 50%; font-size: 14px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8); transition: transform 0.2s; }
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
-
-        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; pointer-events: none; }
-        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; }
-        .card-title { font-size: 13.5px !important; font-weight: 600; margin-bottom: 4px; color: #fff; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-desc { font-size: 12px !important; color: rgba(255,255,255,0.7); font-weight: 400; line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative; }
-        .card-desc span { display: inline-block; }
-        .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
@@ -331,6 +285,12 @@
                 </button>
             </div>
 
+            <div class="setting-item">
+                <button class="menu-btn" onclick="openBackupModal()">
+                    <span>📦 备份与恢复</span>
+                </button>
+            </div>
+
             <div id="adminManagerEntry" style="display:none; margin-bottom:20px;">
                 <button class="menu-btn" onclick="openAdminSubPage()">
                     <span>👤 用户权限管理</span>
@@ -340,6 +300,23 @@
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('userProfileModalOverlay')">关闭</button>
                 <button class="btn btn-save" style="background:#FF453A" onclick="handleLogout()">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="backupModalOverlay" style="z-index: 2200;">
+        <div class="modal">
+            <h3 style="color:white; margin-bottom:20px; text-align:center;">备份与恢复</h3>
+            <p style="color:#ccc; font-size:13px; text-align:center; margin-bottom:20px;">
+                导出将下载包含所有数据和设置的 JSON 文件。<br>导入将<b>覆盖</b>当前所有云端数据，请谨慎操作。
+            </p>
+            <div class="modal-btns" style="flex-direction:column; gap:15px;">
+                <button class="btn" style="background:var(--accent-color); color:white; width:100%" onclick="handleExport()">⬇️ 导出配置到本地</button>
+                <button class="btn" style="background:#333; border:1px solid #555; color:white; width:100%" onclick="triggerImport()">⬆️ 从本地文件导入</button>
+                <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="processImport(event)">
+            </div>
+            <div class="modal-btns" style="margin-top:15px;">
+                <button class="btn btn-cancel" onclick="closeModal('backupModalOverlay')">返回</button>
             </div>
         </div>
     </div>
@@ -612,10 +589,12 @@
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
+                
                 document.title = title;
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = title;
                 titleEl.classList.add('loaded');
+                
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
                 const footerRes = await fetch('/api/config?key=site_footer');
@@ -671,6 +650,49 @@
             } catch(e) {
                 showMsg('保存失败');
             }
+        }
+        
+        // === 备份与恢复逻辑 ===
+        function openBackupModal() {
+            closeModal('userProfileModalOverlay');
+            document.getElementById('backupModalOverlay').classList.add('active');
+        }
+
+        async function handleExport() {
+            window.location.href = '/api/backup';
+        }
+
+        function triggerImport() {
+            document.getElementById('importFileInput').click();
+        }
+
+        async function processImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showLoading("正在恢复数据...");
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    const res = await fetch('/api/backup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(json)
+                    });
+                    
+                    if (res.ok) {
+                        hideLoading(true, "恢复成功");
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        hideLoading(false, "恢复失败");
+                    }
+                } catch (err) {
+                    hideLoading(false, "文件格式错误");
+                }
+            };
+            reader.readAsText(file);
         }
 
         async function loadSites() {
