@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Loading...</title>
-    <link rel="icon" href="/logo.jpg" type="image/jpeg">
+    <link rel="icon" href="/logo.png" type="image/png">
     <style>
         :root { 
             --glass-bg: rgba(0, 0, 0, 0.25); 
@@ -67,7 +67,6 @@
         .engine-option { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
-        /* === 布局样式 === */
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 100px; border-radius: 16px; transition: background 0.2s; }
         .category-section.drag-over { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
@@ -76,7 +75,7 @@
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
-        /* 电脑端布局 */
+        /* 布局 */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
 
         .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; height: 100%; }
@@ -88,31 +87,21 @@
         .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; justify-content: center; }
         .card-title { font-size: 14px !important; font-weight: 600; margin-bottom: 3px; color: #fff; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* === 修复1：文字滚动回归 === */
-        /* 强制单行 + overflow hidden + inline-block span + JS计算滚动 */
+        /* 文字滚动 */
         .card-desc { 
             font-size: 12px !important; 
             color: rgba(255,255,255,0.7); 
             font-weight: 400; 
             line-height: 1.4; 
-            white-space: nowrap; /* 关键：强制单行，保证高度一致 */
+            white-space: nowrap; 
             overflow: hidden; 
             position: relative; 
-            mask-image: linear-gradient(to right, black 85%, transparent 100%); /* 尾部渐隐，更高级 */
+            mask-image: linear-gradient(to right, black 85%, transparent 100%); 
             -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
         }
-        .card-desc span { display: inline-block; padding-right: 15px; } /* 滚动内容的容器 */
-        
-        /* 滚动动画 */
-        .card-desc.scrolling span { 
-            animation: scroll-left linear infinite; 
-            /* animation-duration 由JS动态计算 */ 
-        }
-
-        @keyframes scroll-left { 
-            0% { transform: translateX(0); } 
-            100% { transform: translateX(-50%); } /* 移动50%是因为我们会复制一份文本在后面 */
-        }
+        .card-desc span { display: inline-block; padding-right: 15px; } 
+        .card-desc.scrolling span { animation: scroll-left linear infinite; }
+        @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         body.manage-mode .glass-card { cursor: move; }
         body.manage-mode .glass-card:hover { transform: none; }
@@ -122,24 +111,29 @@
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
-        /* === 修复2：大气灵动的加载动画 === */
+        /* === 修复：加载动画居中无背景 === */
         #gridLoader {
-            position: absolute; top: 120px; left: 0; width: 100%; 
+            position: absolute; 
+            top: 280px; /* 放在搜索框下方 (header高度约120+搜索框高度+间距) */
+            left: 0; right: 0; 
+            width: 100%; 
             display: flex; justify-content: center; align-items: center;
             z-index: 20; pointer-events: none;
             transition: opacity 0.3s;
         }
+        
+        /* 移除 loader-content 的背景 */
         .loader-content {
-            width: 120px; height: 120px;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: auto; height: auto;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+            box-shadow: none;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.4s;
         }
+
         .modern-spinner {
             width: 50px; height: 50px; position: relative;
         }
@@ -154,7 +148,7 @@
             border-top-color: var(--accent-color);
             border-right-color: var(--accent-color);
             animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            box-shadow: 0 0 15px rgba(10, 132, 255, 0.5); /* 灵动的光晕 */
+            box-shadow: 0 0 15px rgba(10, 132, 255, 0.5); 
         }
         
         #cardGrid {
@@ -284,7 +278,7 @@
             </div>
         </div>
 
-        <div id="gridLoader" style="display:none; position:absolute; left:0; right:0; top:150px; z-index:20; text-align:center;">
+        <div id="gridLoader" style="display:none;">
             <div class="loader-content">
                 <div class="modern-spinner"></div>
             </div>
@@ -683,10 +677,8 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        // === 核心修复：防抖动加载 ===
         async function loadConfig() {
             try {
-                // 背景
                 const bgRes = await fetch('/api/config?key=background_api');
                 const bgData = await bgRes.json();
                 if (bgData && bgData.value) {
@@ -696,7 +688,6 @@
                     document.body.style.backgroundImage = `url('${defaultBg}')`;
                 }
 
-                // 标题 (静默替换 + 淡入)
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu-Pilot';
@@ -704,23 +695,20 @@
                 document.title = title;
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = title;
-                titleEl.classList.add('loaded'); // 添加 loaded 类，触发淡入动画
+                titleEl.classList.add('loaded');
                 
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
-                // 页脚
                 const footerRes = await fetch('/api/config?key=site_footer');
                 const footerData = await footerRes.json();
                 const footerText = (footerData && footerData.value) ? footerData.value : '';
                 document.getElementById('siteFooterDisplay').innerHTML = footerText;
                 document.getElementById('siteFooterInput').value = footerText;
 
-                // 分类
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
             } catch(e) { 
                 console.error('Config load error', e);
-                // 出错也显示默认标题
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = 'Zeyu-Pilot';
                 titleEl.classList.add('loaded');
@@ -764,6 +752,61 @@
             } catch(e) {
                 showMsg('保存失败');
             }
+        }
+        
+        // === 备份与恢复逻辑 ===
+        function openBackupModal() {
+            closeModal('userProfileModalOverlay');
+            document.getElementById('backupModalOverlay').classList.add('active');
+        }
+
+        async function handleExport() {
+            window.location.href = '/api/backup';
+        }
+
+        function triggerImport() {
+            document.getElementById('importFileInput').click();
+        }
+
+        async function processImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showLoading("正在恢复数据...");
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    const res = await fetch('/api/backup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(json)
+                    });
+                    
+                    if (res.ok) {
+                        hideLoading(true, "恢复成功");
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        hideLoading(false, "恢复失败");
+                    }
+                } catch (err) {
+                    hideLoading(false, "文件格式错误");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function loadSites() {
+            try {
+                await loadConfig();
+                const res = await fetch('/api/sites');
+                if(!res.ok) throw new Error('API Error');
+                let rawSites = await res.json();
+                if(!Array.isArray(rawSites)) rawSites = [];
+                sites = rawSites;
+                renderGrid();
+            } catch(e) { console.error('Sites load error', e); }
         }
 
         async function checkAuth() {
@@ -1026,19 +1069,7 @@
                 });
                 section.appendChild(grid); container.appendChild(section);
             }
-            
-            // 滚动文字检测逻辑
-            setTimeout(() => { 
-                document.querySelectorAll('.card-desc').forEach(desc => { 
-                    const span = desc.querySelector('span'); 
-                    if (span && span.offsetWidth > desc.offsetWidth) { 
-                        desc.classList.add('scrolling'); 
-                        const dist = span.offsetWidth - desc.offsetWidth + 10; 
-                        span.style.setProperty('--scroll-dist', `-${dist}px`); 
-                        span.style.animationDuration = `${2 + dist/20}s`; 
-                    } 
-                }); 
-            }, 100);
+            setTimeout(() => { document.querySelectorAll('.card-desc').forEach(desc => { const span = desc.querySelector('span'); if (span && span.offsetWidth > desc.offsetWidth) { desc.classList.add('scrolling'); const dist = span.offsetWidth - desc.offsetWidth + 10; span.style.setProperty('--scroll-dist', `-${dist}px`); span.style.animationDuration = `${2 + dist/20}s`; } }); }, 100);
         }
 
         function showContextMenu(e, index) { e.preventDefault(); contextTargetIndex = index; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; let x = e.clientX, y = e.clientY; if (x + 160 > window.innerWidth) x -= 160; menu.style.left = `${x}px`; menu.style.top = `${y}px`; }
