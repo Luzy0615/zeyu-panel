@@ -1,6 +1,8 @@
 # Zeyu-Pilot 极简个人导航面板
 Zeyu-Pilot 是一个基于 **Cloudflare Pages** 全栈部署的轻量级个人导航面板。它集成了前端界面与 Serverless 后端，利用 Cloudflare D1 数据库存储数据，无需购买服务器，免费且速度极快。
-<img width="1254" height="737" alt="20251216_061200_028" src="https://github.com/user-attachments/assets/4f2f5550-3dbe-49a4-b5b8-ad1140f3a544" />
+
+<img width="1172" height="821" alt="20251216_061209_540" src="https://github.com/user-attachments/assets/4f284fc8-bf12-4861-9a82-6ba108852bff" />
+
 
 ## ✨ 功能特性
 * **⚡️ Serverless 架构**：完全运行在 Cloudflare 边缘网络，响应迅速，零维护成本。
