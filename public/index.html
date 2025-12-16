@@ -36,18 +36,19 @@
         .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; }
 
         /* 头部 */
-        .header-container { display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 5px; animation: slideDown 0.8s; }
+        .header-container { display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 5px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .site-title { font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); line-height: 1; margin-top: -6px; }
         .separator { width: 3px; height: 42px; background-color: rgba(255, 255, 255, 0.6); margin: 0 25px; border-radius: 2px; }
         .clock { font-size: 2.6rem; font-weight: 800; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-top: -2px; }
-        .subtitle-container { text-align: center; margin-bottom: 35px; animation: slideDown 0.8s 0.1s backwards; }
-        .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; cursor: pointer; }
+
+        .subtitle-container { text-align: center; margin-bottom: 35px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
+        .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; font-family: "PingFang SC", sans-serif; cursor: pointer; }
 
         /* 搜索栏 */
-        .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s 0.1s backwards; }
-        .search-wrapper { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: 35px; padding-right: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transition: 0.3s; }
-        .search-wrapper:hover { transform: translateY(-4px) scale(1.01); background: rgba(0, 0, 0, 0.5); }
-        .search-wrapper:focus-within { transform: scale(1.02); background: rgba(0, 0, 0, 0.65); border-color: rgba(255,255,255,0.7); }
+        .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
+        .search-wrapper { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: 35px; padding-right: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transition: transform 0.3s, background 0.3s, box-shadow 0.3s; will-change: transform; }
+        .search-wrapper:hover { transform: translateY(-4px) scale(1.01); background: rgba(0, 0, 0, 0.5); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .search-wrapper:focus-within { transform: scale(1.02); background: rgba(0, 0, 0, 0.65); border-color: rgba(255,255,255,0.7); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .engine-select { padding: 15px 18px; cursor: pointer; border-right: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; }
         .engine-icon { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
         .search-input { flex: 1; background: transparent; border: none; padding: 16px 15px; font-size: 16px; color: white; outline: none; }
@@ -60,8 +61,8 @@
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
         /* 卡片与分类 */
-        .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 80px; border-radius: 16px; transition: background 0.2s; }
-        .category-section.drag-over { background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
+        .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 100px; border-radius: 16px; transition: background 0.2s; }
+        .category-section.drag-over { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
         
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
         .cat-edit-btn { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #eee; font-weight: 500; cursor: pointer; display: none; margin-right: 10px; transition: all 0.2s; }
@@ -156,7 +157,6 @@
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
 
-        /* 手机端布局强制适配 */
         @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
@@ -168,7 +168,6 @@
             .engine-select { padding: 8px 12px; }
             .engine-icon { width: 20px; height: 20px; }
             .search-btn { padding: 0 14px; height: 44px; }
-            /* 强制双列 */
             .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
             .glass-card { padding: 10px; min-width: 0; }
             .card-icon { width: 32px; height: 32px; margin-right: 8px; }
@@ -378,7 +377,7 @@
             }, 1000);
         }
 
-        // === 拖拽逻辑 ===
+        // === 拖拽逻辑 (DOM优先策略) ===
         function handleDragStart(e, id) {
             if (!isManageMode) return;
             draggedItem = sites.find(s => s.id === id);
@@ -429,60 +428,62 @@
             if (section) section.classList.remove('drag-over');
         }
 
-        // === 核心修复：拖拽结束立即上传新顺序 ===
+        // === 核心：拖拽松手后，立即计算顺序并全量更新 ===
         async function handleDrop(e, targetCategory) {
             e.preventDefault();
             if (!isManageMode || !draggedItem) return;
-            
             document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
 
-            // 1. 获取所有卡片（全量数据），按屏幕显示顺序
+            // 1. 读取当前屏幕上的所有卡片顺序 (DOM顺序即真理)
+            // 此时 dragging 元素已经被 insertBefore 插入到了正确位置
             const allCards = Array.from(document.querySelectorAll('.glass-card'));
             const payload = [];
+            const newSitesArray = []; // 用于同步更新本地 sites 变量
 
             allCards.forEach((card, index) => {
                 const id = parseInt(card.getAttribute('data-id'));
-                // 找到该卡片对应的分类（通过它的父容器 .category-section）
+                // 找到该卡片目前所在的分类容器
                 const section = card.closest('.category-section');
                 let category = '默认分类';
                 if (section) {
-                    const titleEl = section.querySelector('.category-title span');
-                    if (titleEl) category = titleEl.innerText;
+                    // 从标题里提取分类名 (去除编辑按钮等杂质)
+                    const titleSpan = section.querySelector('.category-title span');
+                    if (titleSpan) category = titleSpan.innerText;
                 }
                 
-                // 将数据压入 payload，注意 index 就是新的 sort_order
+                // 构造更新数据，sort_order 直接用数组下标 index
                 payload.push({
                     id: id,
                     sort_order: index,
                     category: category
                 });
+
+                // 同步更新本地 sites 数据，防止点击齿轮时回跳
+                const originalSite = sites.find(s => s.id === id);
+                if (originalSite) {
+                    originalSite.sort_order = index;
+                    originalSite.category = category;
+                    newSitesArray.push(originalSite);
+                }
             });
 
-            // 2. 立即发送全量更新到后端
+            // 更新全局 sites 变量，确保 renderGrid 读取的是最新顺序
+            sites = newSitesArray;
+
+            // 2. 发送给后端保存
             try {
                 await fetch('/api/batch_update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
-                // 3. 更新本地 sites 数据，防止 UI 回跳
-                sites.forEach(site => {
-                    const update = payload.find(p => p.id === site.id);
-                    if (update) {
-                        site.category = update.category;
-                        site.sort_order = update.sort_order;
-                    }
-                });
-                
             } catch (err) {
                 console.error("Drop save failed", err);
-                showMsg('保存失败');
-                loadSites(); // 失败则回滚
+                showMsg('保存失败，请检查网络');
             }
         }
 
-        // === 核心修复：分类排序立即上传 ===
+        // === 核心：分类排序保存 ===
         async function saveCategoryOrderToRemote() {
             try {
                 await fetch('/api/category_order', {
@@ -495,9 +496,11 @@
 
         async function loadSites() {
             try {
+                // 1. 获取分类顺序
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
                 
+                // 2. 获取站点 (后端已按 sort_order 排序)
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
                 let rawSites = await res.json();
@@ -529,7 +532,7 @@
             isManageMode = !isManageMode;
             document.body.classList.toggle('manage-mode', isManageMode);
             document.getElementById('manageBtn').classList.toggle('active', isManageMode);
-            renderGrid();
+            renderGrid(); // 这里 renderGrid 此时读取的是已经被 handleDrop 更新过的 sites，所以不会回跳
         }
 
         function openUserMenu() {
@@ -627,18 +630,21 @@
                 existingCategories.add(cat);
             });
             
+            // 填充下拉列表
             Array.from(existingCategories).sort().forEach(cat => { const opt = document.createElement('option'); opt.value = cat; catList.appendChild(opt); });
             
-            // 分类排序
+            // 决定分类渲染顺序
             let keys = Object.keys(grouped).sort((a, b) => {
                 let indexA = categoryOrder.indexOf(a), indexB = categoryOrder.indexOf(b);
-                if (indexA === -1) indexA = 9999; if (indexB === -1) indexB = 9999;
+                // 如果是新分类（不在排序列表里），默认放最后
+                if (indexA === -1) indexA = 9999; 
+                if (indexB === -1) indexB = 9999;
                 return indexA - indexB;
             });
 
             for (const category of keys) {
                 let items = grouped[category];
-                // 此时 items 已经是按后端 sort_order 排好的
+                // 此时 items 已经按 sort_order 排序（因为 sites 数组本身是有序的）
                 
                 const section = document.createElement('div'); 
                 section.className = 'category-section';
@@ -760,6 +766,7 @@
         
         function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
         
+        // === 核心：分类改名与排序同步 ===
         async function saveCategory() { 
             const o = document.getElementById('editOldCatName').value;
             const n = document.getElementById('editCatName').value;
@@ -770,7 +777,7 @@
                 if (idx !== -1) categoryOrder[idx] = n;
             } 
             
-            // 立即上传
+            // 不论是否改名，都保存一下顺序（万一之前有移动未保存）
             await saveCategoryOrderToRemote(); 
             
             closeModal('catModalOverlay'); 
@@ -778,26 +785,25 @@
             showMsg('分类已更新'); 
         }
         
-        // === 修复：分类排序按钮立即上传 ===
+        // === 核心修复：点击按钮立即保存分类顺序 ===
         function moveCategory(dir) { 
             const n = document.getElementById('editOldCatName').value;
             const i = categoryOrder.indexOf(n);
             
             if(i === -1) return; 
             
-            // 交换位置
-            if (dir === 'up' && i > 0) {
+            if(dir==='up' && i>0) {
                 [categoryOrder[i], categoryOrder[i-1]] = [categoryOrder[i-1], categoryOrder[i]];
-            } else if (dir === 'down' && i < categoryOrder.length - 1) {
+            } else if(dir==='down' && i<categoryOrder.length-1) {
                 [categoryOrder[i], categoryOrder[i+1]] = [categoryOrder[i+1], categoryOrder[i]];
             } else {
-                return; 
+                return; // 移不动
             }
             
-            // 立即上传新顺序
+            // 立即上传
             saveCategoryOrderToRemote().then(() => {
-                showMsg(dir === 'up' ? '已上移' : '已下移');
-                renderGrid(); 
+                showMsg(dir==='up'?'已上移':'已下移'); 
+                renderGrid(); // 重新渲染界面
             });
         }
         
