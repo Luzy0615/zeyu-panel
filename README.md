@@ -3,7 +3,8 @@ Zeyu-Pilot 是一个基于 **Cloudflare Pages** 全栈部署的轻量级个人�
 
 *(建议在此处替换为你实际的面板截图)*
 
-## ✨ 功能特性* **⚡️ Serverless 架构**：完全运行在 Cloudflare 边缘网络，响应迅速，零维护成本。
+## ✨ 功能特性
+* **⚡️ Serverless 架构**：完全运行在 Cloudflare 边缘网络，响应迅速，零维护成本。
 * **📱 响应式布局**：
 * **电脑端**：自适应 5 列布局，视觉整齐。
 * **移动端**：紧凑型双列布局，优化长文本显示，防止版面错乱。
@@ -114,7 +115,8 @@ VALUES ('guest', 'guest_no_login', 'guest', '[]');
 * **Build output directory**: `public`
 5. 点击 **Save and Deploy**。
 
-### 4. 绑定数据库 (至关重要)项目首次部署完成后（此时网页可能报错，因为没连数据库），需要进行绑定：
+### 4. 绑定数据库
+(至关重要)项目首次部署完成后（此时网页可能报错，因为没连数据库），需要进行绑定：
 1. 进入刚才创建的 Pages 项目页面。
 2. 点击 **Settings** -> **Functions**。
 3. 找到 **D1 database bindings** 部分，点击 **Add binding**。
@@ -124,7 +126,9 @@ VALUES ('guest', 'guest_no_login', 'guest', '[]');
 5. 点击 **Save**。
 6. **最后一步**：切换到 **Deployments** 标签页，点击 **Create deployment** -> **Retry deployment** (重新部署) 以使数据库绑定生效。
 
-## 📖 使用说明###首次登录* 访问你的 Pages 域名。
+## 📖 使用说明
+### 首次登录
+* 访问你的 Pages 域名。
 * 点击右下角的 **👤 用户图标**。
 * 默认管理员账号：`admin`
 * 默认密码：`123456`
