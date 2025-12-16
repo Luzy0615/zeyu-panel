@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Loading...</title>
+    <title>Zeyu Panel</title>
     <link rel="icon" href="/logo.jpg" type="image/jpeg">
     <style>
         :root { 
@@ -74,7 +74,49 @@
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        /* === 布局核心修改开始 === */
+        
+        /* 1. 电脑端 (默认)：强制 5 列 */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 15px; 
+        }
+
+        /* 2. 平板/小屏电脑 (宽度 < 1100px)：回退到自适应，防止挤压 */
+        @media (max-width: 1100px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+        }
+
+        /* 3. 手机端 (宽度 < 768px)：强制 2 列 (保持原有逻辑) */
+        @media (max-width: 768px) { 
+            .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
+            .separator { display: none; }
+            .site-title { font-size: 2.5rem; margin-top: 0; }
+            .clock { font-size: 2rem; margin-top: 0; }
+            .search-container { max-width: 88%; margin-bottom: 25px; }
+            .search-wrapper { border-radius: 30px; padding-right: 4px; min-height: 44px; }
+            .search-input { padding: 10px 12px; font-size: 14px; height: 44px; line-height: 44px; }
+            .engine-select { padding: 8px 12px; }
+            .engine-icon { width: 20px; height: 20px; }
+            .search-btn { padding: 0 14px; height: 44px; }
+            
+            /* 手机端强制规则 */
+            .grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+                gap: 10px; 
+            }
+            .glass-card { padding: 10px; min-width: 0; }
+            .card-icon { width: 32px; height: 32px; margin-right: 8px; }
+            .card-title { font-size: 13px !important; margin-bottom: 2px; }
+            .card-desc { font-size: 11px !important; opacity: 0.8; }
+            .modal { width: 90%; }
+            .category-title { font-size: 1rem; margin-top: 25px; }
+        }
+        /* === 布局核心修改结束 === */
+
         .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
         .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         .glass-card:active { transform: scale(0.96); }
@@ -155,26 +197,6 @@
         @keyframes cardEntrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
-
-        @media (max-width: 768px) { 
-            .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
-            .separator { display: none; }
-            .site-title { font-size: 2.5rem; margin-top: 0; }
-            .clock { font-size: 2rem; margin-top: 0; }
-            .search-container { max-width: 88%; margin-bottom: 25px; }
-            .search-wrapper { border-radius: 30px; padding-right: 4px; min-height: 44px; }
-            .search-input { padding: 10px 12px; font-size: 14px; height: 44px; line-height: 44px; }
-            .engine-select { padding: 8px 12px; }
-            .engine-icon { width: 20px; height: 20px; }
-            .search-btn { padding: 0 14px; height: 44px; }
-            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
-            .glass-card { padding: 10px; min-width: 0; }
-            .card-icon { width: 32px; height: 32px; margin-right: 8px; }
-            .card-title { font-size: 13px !important; margin-bottom: 2px; }
-            .card-desc { font-size: 11px !important; opacity: 0.8; }
-            .modal { width: 90%; }
-            .category-title { font-size: 1rem; margin-top: 25px; }
-        }
         
         .site-footer {
             width: 100%; text-align: center; padding: 20px; color: rgba(255, 255, 255, 0.6);
@@ -223,7 +245,7 @@
 
     <div class="fab-container">
         <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
         <button class="fab-btn secondary" onclick="openUserMenu()" id="userBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -558,10 +580,8 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        // === 核心修复：防抖动加载 ===
         async function loadConfig() {
             try {
-                // 背景
                 const bgRes = await fetch('/api/config?key=background_api');
                 const bgData = await bgRes.json();
                 if (bgData && bgData.value) {
@@ -571,31 +591,25 @@
                     document.body.style.backgroundImage = `url('${defaultBg}')`;
                 }
 
-                // 标题 (静默替换 + 淡入)
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
-                
                 document.title = title;
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = title;
-                titleEl.classList.add('loaded'); // 添加 loaded 类，触发淡入动画
-                
+                titleEl.classList.add('loaded');
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
-                // 页脚
                 const footerRes = await fetch('/api/config?key=site_footer');
                 const footerData = await footerRes.json();
                 const footerText = (footerData && footerData.value) ? footerData.value : '';
                 document.getElementById('siteFooterDisplay').innerHTML = footerText;
                 document.getElementById('siteFooterInput').value = footerText;
 
-                // 分类
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
             } catch(e) { 
                 console.error('Config load error', e);
-                // 出错也显示默认标题
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = 'Zeyu Panel';
                 titleEl.classList.add('loaded');
