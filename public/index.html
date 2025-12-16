@@ -74,28 +74,16 @@
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
-        /* === 布局与卡片样式 === */
+        /* === 布局核心 CSS === */
         
-        /* 1. 电脑端：使用 auto-fill + minmax(210px) = 5列/1200px */
+        /* 电脑端 */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
             gap: 15px; 
         }
 
-        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
-        .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-        .glass-card:active { transform: scale(0.96); }
-
-        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; pointer-events: none; }
-        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; }
-        .card-title { font-size: 13.5px !important; font-weight: 600; margin-bottom: 4px; color: #fff; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-desc { font-size: 12px !important; color: rgba(255,255,255,0.7); font-weight: 400; line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative; }
-        .card-desc span { display: inline-block; }
-        .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
-
-        /* 2. 手机端：强制修复布局 */
+        /* 手机端 */
         @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
@@ -108,12 +96,10 @@
             .engine-icon { width: 20px; height: 20px; }
             .search-btn { padding: 0 14px; height: 44px; }
             
-            /* 强制双列 */
             .grid { 
                 grid-template-columns: 1fr 1fr !important; 
                 gap: 8px !important; 
             }
-            /* 卡片紧凑 */
             .glass-card { 
                 padding: 10px !important; 
                 min-width: 0; 
@@ -123,7 +109,6 @@
                 height: 32px !important; 
                 margin-right: 8px !important; 
             }
-            /* 强制文字不换行 */
             .card-title { 
                 font-size: 13px !important; 
                 margin-bottom: 2px;
@@ -144,6 +129,9 @@
             .category-title { font-size: 1rem; margin-top: 25px; }
         }
 
+        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
+        .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .glass-card:active { transform: scale(0.96); }
         body.manage-mode .glass-card { cursor: move; }
         body.manage-mode .glass-card:hover { transform: none; }
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
@@ -152,6 +140,14 @@
         .card-edit-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--accent-color); color: white; border-radius: 50%; font-size: 14px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8); transition: transform 0.2s; }
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
+
+        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; pointer-events: none; }
+        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; }
+        .card-title { font-size: 13.5px !important; font-weight: 600; margin-bottom: 4px; color: #fff; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-desc { font-size: 12px !important; color: rgba(255,255,255,0.7); font-weight: 400; line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative; }
+        .card-desc span { display: inline-block; }
+        .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
@@ -261,7 +257,7 @@
 
     <div class="fab-container">
         <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
         <button class="fab-btn secondary" onclick="openUserMenu()" id="userBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -370,7 +366,7 @@
             <h3 style="color:white; margin-bottom:20px; text-align:center;">主页设置</h3>
             <div class="input-group">
                 <label>网页名称</label>
-                <input type="text" class="input-field" id="siteNameInput" placeholder="默认: Zeyu Panel">
+                <input type="text" class="input-field" id="siteNameInput" placeholder="默认: Zeyu-Pilot">
             </div>
             <div class="input-group">
                 <label>背景图片 API</label>
@@ -378,7 +374,7 @@
             </div>
             <div class="input-group">
                 <label>自定义页脚 (支持 HTML)</label>
-                <input type="text" class="input-field" id="siteFooterInput" placeholder="例如: © 2024 Zeyu Panel">
+                <input type="text" class="input-field" id="siteFooterInput" placeholder="例如: © 2024 Zeyu-Pilot">
             </div>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="closeModal('homeSettingsModalOverlay')">取消</button>
@@ -632,7 +628,7 @@
 
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
-                const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
+                const title = (titleData && titleData.value) ? titleData.value : 'Zeyu-Pilot';
                 
                 document.title = title;
                 const titleEl = document.getElementById('siteTitleDisplay');
@@ -652,7 +648,7 @@
             } catch(e) { 
                 console.error('Config load error', e);
                 const titleEl = document.getElementById('siteTitleDisplay');
-                titleEl.innerText = 'Zeyu Panel';
+                titleEl.innerText = 'Zeyu-Pilot';
                 titleEl.classList.add('loaded');
             }
         }
@@ -663,7 +659,7 @@
         }
 
         async function saveHomeSettings() {
-            const title = document.getElementById('siteNameInput').value || 'Zeyu Panel';
+            const title = document.getElementById('siteNameInput').value || 'Zeyu-Pilot';
             const bgUrl = document.getElementById('bgApiInput').value;
             const footer = document.getElementById('siteFooterInput').value;
 
