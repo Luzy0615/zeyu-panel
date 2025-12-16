@@ -328,7 +328,7 @@
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
         let categoryOrder = [];
-        let siteSortOrder = []; 
+        let siteSortOrder = [];
         let currentUserRole = 'guest';
         let sites = [];
         let existingCategories = new Set();
@@ -437,6 +437,8 @@
             
             document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
             
+            layoutChanged = true;
+
             // 1. 处理跨分类移动
             if (draggedItem.category !== targetCategory) {
                 const oldCat = draggedItem.category;
@@ -458,25 +460,25 @@
                 }
             }
             
-            // 2. 实时更新顺序状态
+            // 2. 实时更新本地顺序状态
             const allCards = document.querySelectorAll('.glass-card');
             const newOrder = [];
             allCards.forEach(card => {
                 const id = parseInt(card.getAttribute('data-id'));
                 if (id) newOrder.push(id);
             });
-            siteSortOrder = newOrder;
             
+            siteSortOrder = newOrder;
             // 3. 立即保存到数据库 (卡片排序)
             await saveSortToDB();
         }
 
-        // === 核心：保存排序到数据库 ===
+        // === 需求2：保存排序到数据库 (全端同步) ===
         async function saveSortToDB() {
             try {
                 // 1. 保存卡片顺序
                 const sortOrder = sites.map(s => s.id);
-                // 确保我们使用的是最新的 siteSortOrder（如果刚拖拽完）
+                // 优先使用最新的顺序
                 const finalOrder = siteSortOrder.length > 0 ? siteSortOrder : sortOrder;
                 
                 await fetch('/api/sites/sort', {
@@ -496,13 +498,22 @@
             }
         }
 
+        // === 核心功能：保存分类顺序到远程 ===
+        async function saveCategoryOrderToRemote() {
+            try {
+                await fetch('/api/category_order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(categoryOrder)
+                });
+            } catch(e) { console.error('Cat order save failed', e); }
+        }
+
         async function loadSites() {
             try {
-                // 1. 先获取分类顺序
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
                 
-                // 2. 获取站点 (后端已排序)
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
                 let rawSites = await res.json();
@@ -532,9 +543,27 @@
         function toggleEditMode() {
             if(currentUserRole !== 'admin') return showMsg('需要管理员权限');
             
+            if (isManageMode && layoutChanged) {
+                showConfirm('布局已变动，是否保存？', 
+                    async () => { 
+                        layoutChanged = false;
+                        await saveSortToDB(); 
+                        showMsg('布局已保存');
+                        performToggle();
+                    },
+                    () => { 
+                        layoutChanged = false;
+                        siteSortOrder = originalSortOrder; 
+                        loadSites(); 
+                        performToggle();
+                    }
+                );
+                return;
+            }
+
             if (!isManageMode) {
-                // 进入编辑模式备份数据
                 originalSortOrder = [...siteSortOrder];
+                layoutChanged = false;
             }
 
             performToggle();
@@ -643,7 +672,6 @@
             
             Array.from(existingCategories).sort().forEach(cat => { const opt = document.createElement('option'); opt.value = cat; catList.appendChild(opt); });
             
-            // 分类排序
             let keys = Object.keys(grouped).sort((a, b) => {
                 let indexA = categoryOrder.indexOf(a), indexB = categoryOrder.indexOf(b);
                 if (indexA === -1) indexA = 9999; if (indexB === -1) indexB = 9999;
@@ -652,7 +680,6 @@
 
             for (const category of keys) {
                 let items = grouped[category];
-                // 强制排序：优先使用本地拖拽后的 sortOrder，否则使用 loadSites 下来的顺序
                 if (siteSortOrder.length > 0) {
                     items.sort((a, b) => {
                         let idxA = siteSortOrder.indexOf(a.id);
@@ -790,12 +817,13 @@
             // 1. 如果改名了，先更新名字
             if(o!==n && n) { 
                 await fetch('/api/category',{method:'PUT',body:JSON.stringify({oldName:o, newName:n})}); 
+                // 更新本地 categoryOrder 中的名字
                 const i=categoryOrder.indexOf(o); 
                 if(i!==-1) categoryOrder[i]=n; 
             } 
             
             // 2. 无论是否改名，只要点击保存，就同步当前的分类顺序到数据库
-            await saveSortToDB();
+            await saveCategoryOrderToRemote(); // 这里是关键修复
             
             closeModal('catModalOverlay'); 
             loadSites(); 
