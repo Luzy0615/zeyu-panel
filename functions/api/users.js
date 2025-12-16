@@ -1,28 +1,32 @@
-export async function onRequest(context) {
+/**
+ * functions/api/users.js
+ * V66.0: 支持更新 allowed_categories
+ */
+export async function onRequestGet(context) {
+  const { env } = context;
+  // 获取所有用户，包括 allowed_categories
+  const { results } = await env.DB.prepare("SELECT id, username, role, allowed_categories FROM users").all();
+  return new Response(JSON.stringify(results), { headers: { "Content-Type": "application/json" } });
+}
+
+export async function onRequestPut(context) {
   const { request, env } = context;
-  
-  // 权限检查：只有 admin 能操作此接口
-  const cookie = request.headers.get("Cookie");
-  const role = cookie && cookie.includes("user_role=admin") ? "admin" : "guest";
-  
-  if (role !== 'admin') {
-    return new Response("Permission denied", { status: 403 });
-  }
+  try {
+    const body = await request.json();
+    const { id, newRole, allowedCategories } = body; // 接收 allowedCategories
 
-  // GET: 获取所有用户列表
-  if (request.method === "GET") {
-    const { results } = await env.DB.prepare("SELECT id, username, role FROM users").all();
-    return Response.json(results);
-  }
-
-  // PUT: 修改用户权限
-  if (request.method === "PUT") {
-    const { id, newRole } = await request.json();
-    if (id === 1) return new Response("不能修改超级管理员权限", { status: 400 }); // 保护 admin
+    if (newRole) {
+        await env.DB.prepare("UPDATE users SET role = ? WHERE id = ?").bind(newRole, id).run();
+    }
     
-    await env.DB.prepare("UPDATE users SET role = ? WHERE id = ?").bind(newRole, id).run();
-    return Response.json({ message: "Updated" });
-  }
+    // **关键修改**：如果有传 allowedCategories，则更新
+    if (allowedCategories !== undefined) {
+        const catStr = JSON.stringify(allowedCategories);
+        await env.DB.prepare("UPDATE users SET allowed_categories = ? WHERE id = ?").bind(catStr, id).run();
+    }
 
-  return new Response("Method not allowed", { status: 405 });
+    return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+  } catch (e) {
+    return new Response(e.message, { status: 500 });
+  }
 }
