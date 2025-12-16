@@ -38,7 +38,6 @@
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; flex: 1; }
 
-        /* 头部 */
         .header-container { display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 5px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .site-title { 
             font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; 
@@ -53,7 +52,6 @@
         .subtitle-container { text-align: center; margin-bottom: 35px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
         .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; cursor: pointer; }
 
-        /* 搜索栏 */
         .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
         .search-wrapper { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: 35px; padding-right: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transition: transform 0.3s, background 0.3s, box-shadow 0.3s; will-change: transform; }
         .search-wrapper:hover { transform: translateY(-4px) scale(1.01); background: rgba(0, 0, 0, 0.5); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
@@ -69,7 +67,6 @@
         .engine-option { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
-        /* 卡片与分类 */
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 100px; border-radius: 16px; transition: background 0.2s; }
         .category-section.drag-over { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
@@ -77,20 +74,30 @@
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
-        /* === 布局修复区域 Start === */
+        /* === 布局核心 CSS === */
         
-        /* 1. 电脑端：使用 auto-fill + minmax(210px) 
-           在 1200px 宽度的容器中，210px * 5 = 1050px (加上间距正好 5 列)
-           这比强制 repeat(5, 1fr) 更稳定，不会变形
-        */
+        /* 1. 电脑端 (Desktop)：保持您满意的一行5个 */
+        /* minmax(210px, 1fr) 配合 1200px 容器，会自动呈现 5 列，且不会过度拉伸 */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
             gap: 15px; 
         }
 
-        /* 2. 手机端 (小于 600px)：恢复经典的双列布局 */
-        @media (max-width: 600px) { 
+        /* 卡片基础样式 */
+        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
+        .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .glass-card:active { transform: scale(0.96); }
+        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; pointer-events: none; }
+        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; }
+        .card-title { font-size: 13.5px; font-weight: 600; margin-bottom: 4px; color: #fff; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-desc { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 400; line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative; }
+        .card-desc span { display: inline-block; }
+        .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
+
+        /* 2. 手机端 (Mobile)：强力修复版 */
+        @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
             .site-title { font-size: 2.5rem; margin-top: 0; }
@@ -102,23 +109,47 @@
             .engine-icon { width: 20px; height: 20px; }
             .search-btn { padding: 0 14px; height: 44px; }
             
-            /* 恢复 V67 之前的手机布局，不再强制压缩 */
+            /* 强制双列，且间距紧凑 */
             .grid { 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 10px; 
+                grid-template-columns: 1fr 1fr !important; /* 强制两列 */
+                gap: 8px !important; 
             }
-            .glass-card { padding: 10px 10px; flex-direction: row; align-items: center; }
-            .card-icon { width: 36px; height: 36px; margin-right: 10px; }
-            .card-title { font-size: 14px !important; margin-bottom: 2px; }
-            .card-desc { font-size: 11px !important; opacity: 0.8; }
+            
+            /* 卡片紧凑化 */
+            .glass-card { 
+                padding: 10px !important; 
+                min-width: 0; /* 防止内容撑大格子 */
+            }
+            
+            /* 图标缩小 */
+            .card-icon { 
+                width: 32px !important; 
+                height: 32px !important; 
+                margin-right: 8px !important; 
+            }
+            
+            /* 文字限制：禁止换行，强制省略号，防止卡片变高 */
+            .card-title { 
+                font-size: 13px !important; 
+                margin-bottom: 2px;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            
+            .card-desc { 
+                font-size: 11px !important; 
+                opacity: 0.8;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                display: block !important; /* 确保占位 */
+            }
+            
             .modal { width: 90%; }
             .category-title { font-size: 1rem; margin-top: 25px; }
         }
-        /* === 布局修复区域 End === */
 
-        .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: visible; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; }
-        .glass-card:hover { transform: translateY(-5px); background: rgba(60, 60, 60, 0.4); border-color: rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-        .glass-card:active { transform: scale(0.96); }
         body.manage-mode .glass-card { cursor: move; }
         body.manage-mode .glass-card:hover { transform: none; }
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
@@ -127,14 +158,6 @@
         .card-edit-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--accent-color); color: white; border-radius: 50%; font-size: 14px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8); transition: transform 0.2s; }
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
-
-        .card-icon { width: 44px; height: 44px; border-radius: 12px; margin-right: 14px; background: rgba(255,255,255,0.1); overflow: hidden; flex-shrink: 0; pointer-events: none; }
-        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { flex: 1; overflow: hidden; min-width: 0; display: flex; flex-direction: column; pointer-events: none; }
-        .card-title { font-size: 13.5px !important; font-weight: 600; margin-bottom: 4px; color: #fff; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-desc { font-size: 12px !important; color: rgba(255,255,255,0.7); font-weight: 400; line-height: 1.4; white-space: nowrap; overflow: hidden; position: relative; }
-        .card-desc span { display: inline-block; }
-        .card-desc.scrolling span { animation: scroll-left linear infinite; animation-delay: 0s; }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
         .fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
@@ -244,7 +267,7 @@
 
     <div class="fab-container">
         <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
         <button class="fab-btn secondary" onclick="openUserMenu()" id="userBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -415,6 +438,7 @@
             bilibili: { name: 'Bilibili', url: 'https://search.bilibili.com/all?keyword=', icon: 'https://www.bilibili.com/favicon.ico' }
         };
         const placeholderIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
+        const defaultBg = 'https://t.alcy.cc/ycy';
         
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
@@ -578,18 +602,17 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        // === 核心逻辑修改：loadConfig 负责淡入标题 ===
         async function loadConfig() {
             try {
-                // 背景
                 const bgRes = await fetch('/api/config?key=background_api');
                 const bgData = await bgRes.json();
                 if (bgData && bgData.value) {
                     document.body.style.backgroundImage = `url('${bgData.value}')`;
                     document.getElementById('bgApiInput').value = bgData.value;
+                } else {
+                    document.body.style.backgroundImage = `url('${defaultBg}')`;
                 }
 
-                // 标题 (静默替换 + 淡入)
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
@@ -597,23 +620,20 @@
                 document.title = title;
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = title;
-                titleEl.classList.add('loaded'); // 添加 loaded 类，触发淡入动画
+                titleEl.classList.add('loaded');
                 
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
-                // 页脚
                 const footerRes = await fetch('/api/config?key=site_footer');
                 const footerData = await footerRes.json();
                 const footerText = (footerData && footerData.value) ? footerData.value : '';
                 document.getElementById('siteFooterDisplay').innerHTML = footerText;
                 document.getElementById('siteFooterInput').value = footerText;
 
-                // 分类
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
             } catch(e) { 
-                console.error('Config load error', e); 
-                // 出错也显示默认标题
+                console.error('Config load error', e);
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = 'Zeyu Panel';
                 titleEl.classList.add('loaded');
@@ -836,9 +856,13 @@
         }
 
         async function updateUserRole(id) {
-            const newRole = document.getElementById(`role-${id}`).value;
-            await fetch('/api/users', { method: 'PUT', body: JSON.stringify({ id, newRole }) });
-            showMsg('权限已更新');
+            const roleSelect = document.getElementById(`role-${id}`);
+            let body = { id };
+            if (roleSelect) {
+                body.newRole = roleSelect.value;
+            }
+            await fetch('/api/users', { method: 'PUT', body: JSON.stringify(body) });
+            showMsg('已保存');
             loadUserList();
         }
 
