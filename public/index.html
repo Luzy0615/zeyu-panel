@@ -70,12 +70,10 @@
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 100px; border-radius: 16px; transition: background 0.2s; }
         .category-section.drag-over { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
-        
         .cat-edit-btn { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #eee; font-weight: 500; cursor: pointer; display: none; margin-right: 10px; transition: all 0.2s; }
         .cat-edit-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; transform: scale(1.05); }
         body.manage-mode .cat-edit-btn { display: inline-flex; align-items: center; gap: 4px; animation: popIn 0.3s; }
         
-        /* 布局 */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
 
         .glass-card { display: flex; align-items: center; padding: 14px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: var(--card-radius); cursor: pointer; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; max-width: 100%; user-select: none; height: 100%; }
@@ -111,18 +109,16 @@
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
-        /* === 修复：加载动画居中无背景 === */
+        /* === 修复：加载动画 === */
         #gridLoader {
-            position: absolute; 
-            top: 280px; /* 放在搜索框下方 (header高度约120+搜索框高度+间距) */
-            left: 0; right: 0; 
-            width: 100%; 
+            /* 1. 使用 margin: 0 auto 实现自然流布局居中，不再使用 absolute */
+            margin: 60px auto 40px auto; 
             display: flex; justify-content: center; align-items: center;
             z-index: 20; pointer-events: none;
             transition: opacity 0.3s;
         }
         
-        /* 移除 loader-content 的背景 */
+        /* 去掉所有背景 */
         .loader-content {
             width: auto; height: auto;
             background: transparent;
@@ -148,11 +144,11 @@
             border-top-color: var(--accent-color);
             border-right-color: var(--accent-color);
             animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            box-shadow: 0 0 15px rgba(10, 132, 255, 0.5); 
+            box-shadow: 0 0 15px rgba(10, 132, 255, 0.6); 
         }
         
         #cardGrid {
-            opacity: 1; transition: opacity 0.4s ease; min-height: 200px;
+            opacity: 1; transition: opacity 0.5s ease; min-height: 200px;
         }
 
         .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; align-items: flex-end; }
@@ -214,8 +210,8 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes cardEntrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        
+        @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
+
         @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
@@ -227,12 +223,10 @@
             .engine-select { padding: 8px 12px; }
             .engine-icon { width: 20px; height: 20px; }
             .search-btn { padding: 0 14px; height: 44px; }
-            
-            /* 手机端布局：双列 */
-            .grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-            .glass-card { padding: 10px !important; min-width: 0; }
-            .card-icon { width: 32px !important; height: 32px !important; margin-right: 8px !important; }
-            .card-title { font-size: 13px !important; margin-bottom: 2px; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
+            .glass-card { padding: 10px; min-width: 0; }
+            .card-icon { width: 32px; height: 32px; margin-right: 8px; }
+            .card-title { font-size: 13px !important; margin-bottom: 2px; }
             .card-desc { font-size: 11px !important; opacity: 0.8; }
             .modal { width: 90%; }
             .category-title { font-size: 1rem; margin-top: 25px; }
@@ -278,7 +272,7 @@
             </div>
         </div>
 
-        <div id="gridLoader" style="display:none;">
+        <div id="gridLoader">
             <div class="loader-content">
                 <div class="modern-spinner"></div>
             </div>
@@ -527,29 +521,32 @@
 
         // === 核心逻辑：加载动画控制 ===
         async function loadSites() {
-            // 1. 显示圆圈，隐藏列表
-            document.getElementById('gridLoader').style.display = 'block';
+            document.getElementById('gridLoader').style.display = 'flex'; // 强制可见
             document.getElementById('cardGrid').style.opacity = '0';
 
             try {
+                // 1. 加载配置
                 await loadConfig();
+                
+                // 2. 加载站点
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
                 let rawSites = await res.json();
                 if(!Array.isArray(rawSites)) rawSites = [];
                 sites = rawSites;
                 
-                // 渲染数据
+                // 3. 渲染
                 renderGrid();
+                
+                // 4. 强制延迟，确保用户能看到动画（防闪烁）
+                await new Promise(r => setTimeout(r, 500));
                 
             } catch(e) { 
                 console.error('Sites load error', e); 
             } finally {
-                // 2. 隐藏圆圈，淡入列表 (加个微小延迟确保渲染完成)
-                setTimeout(() => {
-                    document.getElementById('gridLoader').style.display = 'none';
-                    document.getElementById('cardGrid').style.opacity = '1';
-                }, 300);
+                // 5. 隐藏动画
+                document.getElementById('gridLoader').style.display = 'none';
+                document.getElementById('cardGrid').style.opacity = '1';
             }
         }
 
@@ -795,18 +792,6 @@
                 }
             };
             reader.readAsText(file);
-        }
-
-        async function loadSites() {
-            try {
-                await loadConfig();
-                const res = await fetch('/api/sites');
-                if(!res.ok) throw new Error('API Error');
-                let rawSites = await res.json();
-                if(!Array.isArray(rawSites)) rawSites = [];
-                sites = rawSites;
-                renderGrid();
-            } catch(e) { console.error('Sites load error', e); }
         }
 
         async function checkAuth() {
