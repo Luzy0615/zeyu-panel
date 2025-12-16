@@ -23,6 +23,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-stack); -webkit-font-smoothing: antialiased; }
         
         body { 
+            /* 默认背景，JS加载后会被覆盖 */
             background: url('https://t.alcy.cc/ycy') no-repeat center center fixed; 
             background-size: cover; 
             min-height: 100vh; 
@@ -31,6 +32,7 @@
             box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.15); 
             overflow-x: hidden; 
             padding-bottom: 100px; 
+            transition: background-image 0.5s ease; /* 背景切换动画 */
         }
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; }
@@ -82,17 +84,7 @@
         body.manage-mode .glass-card.shake { animation: shake 0.3s infinite ease-in-out; border-color: var(--accent-color); background: rgba(10, 132, 255, 0.15); }
         .glass-card.dragging { opacity: 0.5; border: 2px dashed #fff; background: rgba(255,255,255,0.1); }
 
-        /* 卡片右上角编辑按钮 */
-        .card-edit-btn { 
-            position: absolute; top: -8px; right: -8px; 
-            width: 24px; height: 24px; 
-            background: var(--accent-color); color: white; 
-            border-radius: 50%; font-size: 14px; 
-            display: none; align-items: center; justify-content: center; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
-            cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8);
-            transition: transform 0.2s;
-        }
+        .card-edit-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--accent-color); color: white; border-radius: 50%; font-size: 14px; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 10; border: 2px solid rgba(255,255,255,0.8); transition: transform 0.2s; }
         body.manage-mode .card-edit-btn { display: flex; animation: popIn 0.3s; }
         .card-edit-btn:hover { transform: scale(1.2); background: #0062cc; }
 
@@ -136,11 +128,18 @@
         .btn-cancel:hover { background: rgba(255, 255, 255, 0.2); color: white; }
         .btn-save { background: var(--accent-color); color: white; }
         .btn-move { flex: 0.5; background: rgba(255, 255, 255, 0.15); font-size: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; }
+        
+        /* 设置菜单样式 */
+        .setting-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .setting-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .menu-btn { width: 100%; text-align: left; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .menu-btn:hover { background: rgba(255,255,255,0.15); }
+        .menu-btn::after { content: '>'; color: rgba(255,255,255,0.5); }
+
         .user-list { width: 100%; border-collapse: collapse; margin-bottom: 20px; color: #eee; font-size: 13px; }
         .user-list th, .user-list td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-role-select { background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px; }
 
-        /* 动画视图 */
         .login-anim-view, .loading-anim-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; width: 100%; }
         .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         .status-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -252,17 +251,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="loadingModalOverlay" style="z-index: 3500;">
-        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
-                <div id="loadSpinner" class="spinner"></div>
-                <div id="loadSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <div id="loadError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
-                <p id="loadText" class="status-text" style="margin-top:15px;">处理中...</p>
-            </div>
-        </div>
-    </div>
-
     <div class="modal-overlay" id="msgModalOverlay" style="z-index: 3000;">
         <div class="modal" style="min-height: auto; padding: 25px; width: 320px; text-align: center;">
             <div style="margin-bottom: 20px; font-size: 16px; color: #fff;" id="msgContent"></div>
@@ -275,15 +263,49 @@
 
     <div class="modal-overlay" id="userProfileModalOverlay">
         <div class="modal">
-            <h3 style="color:white; margin-bottom:15px; text-align:center;">用户中心</h3>
-            <p style="text-align:center; color:#ccc; font-size:1rem; margin-bottom:20px;" id="currentUsernameDisplay">Admin</p>
-            <div id="adminManagerContainer" style="display:none; margin-bottom:20px;">
-                <h4 style="color:#ddd; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">用户权限管理</h4>
-                <div id="userListContainer">Loading...</div>
+            <h3 style="color:white; margin-bottom:20px; text-align:center;">用户中心</h3>
+            <p style="text-align:center; color:#ccc; font-size:1rem; margin-bottom:25px;" id="currentUsernameDisplay">Admin</p>
+            
+            <div class="setting-item">
+                <div class="input-group">
+                    <label>背景图片 API</label>
+                    <div class="url-input-wrapper">
+                        <input type="text" class="input-field" id="bgApiInput" placeholder="输入图片URL或API接口">
+                        <button class="btn-get" onclick="saveBackground()">保存</button>
+                    </div>
+                </div>
             </div>
+
+            <div id="adminManagerEntry" style="display:none; margin-bottom:20px;">
+                <button class="menu-btn" onclick="openAdminSubPage()">
+                    <span>👤 用户权限管理</span>
+                </button>
+            </div>
+
             <div class="modal-btns">
-                <button class="btn btn-cancel" onclick="closeModal('userProfileModalOverlay')">返回</button>
+                <button class="btn btn-cancel" onclick="closeModal('userProfileModalOverlay')">关闭</button>
                 <button class="btn btn-save" style="background:#FF453A" onclick="handleLogout()">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="userManageModalOverlay" style="z-index: 2100;">
+        <div class="modal">
+            <h3 style="color:white; margin-bottom:20px; text-align:center;">用户权限管理</h3>
+            <div id="userListContainer">Loading...</div>
+            <div class="modal-btns">
+                <button class="btn btn-cancel" onclick="closeModal('userManageModalOverlay')">返回</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loadingModalOverlay" style="z-index: 3500;">
+        <div class="modal" style="width:300px; min-height:160px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div class="loading-anim-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                <div id="loadSpinner" class="spinner"></div>
+                <div id="loadSuccess" class="status-icon success" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                <div id="loadError" class="status-icon error" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                <p id="loadText" class="status-text" style="margin-top:15px;">处理中...</p>
             </div>
         </div>
     </div>
@@ -381,6 +403,7 @@
             }, 1000);
         }
 
+        // === 拖拽逻辑 (DOM优先策略) ===
         function handleDragStart(e, id) {
             if (!isManageMode) return;
             draggedItem = sites.find(s => s.id === id);
@@ -463,7 +486,7 @@
                 }
             });
 
-            sites = newSitesArray;
+            sites = newSitesArray; // 同步更新内存
 
             try {
                 await fetch('/api/batch_update', {
@@ -488,10 +511,43 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        async function loadSites() {
+        // === 加载配置 (背景图 + 分类顺序) ===
+        async function loadConfig() {
             try {
+                // 加载背景
+                const bgRes = await fetch('/api/config?key=background_api');
+                const bgData = await bgRes.json();
+                if (bgData && bgData.value) {
+                    document.body.style.backgroundImage = `url('${bgData.value}')`;
+                    document.getElementById('bgApiInput').value = bgData.value;
+                }
+
+                // 加载分类顺序
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
+            } catch(e) { console.error('Config load error', e); }
+        }
+
+        async function saveBackground() {
+            const url = document.getElementById('bgApiInput').value;
+            if(!url) return showMsg('请输入URL');
+            
+            document.body.style.backgroundImage = `url('${url}')`;
+            
+            try {
+                await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'background_api', value: url })
+                });
+                showMsg('背景已保存');
+            } catch(e) { showMsg('保存失败'); }
+        }
+
+        async function loadSites() {
+            try {
+                // 并行加载配置和站点
+                await loadConfig();
                 
                 const res = await fetch('/api/sites');
                 if(!res.ok) throw new Error('API Error');
@@ -516,6 +572,10 @@
             const isAdmin = currentUserRole === 'admin';
             document.getElementById('addBtn').style.display = isAdmin ? 'flex' : 'none';
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
+            
+            // 显示/隐藏用户管理入口
+            document.getElementById('adminManagerEntry').style.display = isAdmin ? 'block' : 'none';
+            
             if(!isAdmin && isManageMode) toggleEditMode();
         }
 
@@ -537,13 +597,14 @@
             } else {
                 document.getElementById('currentUsernameDisplay').innerText = `当前用户: ${currentUserRole === 'admin' ? '管理员' : '普通用户'}`;
                 document.getElementById('userProfileModalOverlay').classList.add('active');
-                if (currentUserRole === 'admin') {
-                    document.getElementById('adminManagerContainer').style.display = 'block';
-                    loadUserList();
-                } else {
-                    document.getElementById('adminManagerContainer').style.display = 'none';
-                }
             }
+        }
+
+        // 打开二级用户管理页面
+        function openAdminSubPage() {
+            closeModal('userProfileModalOverlay'); // 关闭一级弹窗
+            document.getElementById('userManageModalOverlay').classList.add('active');
+            loadUserList();
         }
 
         async function handleLogin() {
@@ -785,24 +846,18 @@
                 [categoryOrder[i], categoryOrder[i+1]] = [categoryOrder[i+1], categoryOrder[i]];
             } else { return; }
             
-            // 需求1：静默保存，移除 "showMsg"
+            // 立即上传 (去掉了 showMsg)
             saveCategoryOrderToRemote().then(() => {
                 renderGrid(); 
             });
         }
 
-        // 需求2：删除分类逻辑
         async function handleDeleteCategory() {
             const name = document.getElementById('editOldCatName').value;
             showConfirm(`确定删除分类 "${name}" 及其所有标签吗？此操作不可恢复！`, async () => {
                 try {
-                    // 调用后端删除接口
                     await fetch(`/api/category_delete?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
-                    
-                    // 从本地排序列表中移除
                     categoryOrder = categoryOrder.filter(c => c !== name);
-                    
-                    // 同步更新排序
                     await saveCategoryOrderToRemote();
 
                     closeModal('catModalOverlay');
