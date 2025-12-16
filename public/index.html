@@ -1041,7 +1041,7 @@
                     const originalIndex = sites.findIndex(s => s.id === site.id);
                     card.oncontextmenu = (e) => showContextMenu(e, originalIndex);
                     
-                    // 自动图标逻辑 (Scheme 1)
+                    // 自动图标逻辑 (Scheme 1) - 修复版
                     let iconSrc = site.icon;
                     if (!iconSrc && site.url) {
                         try {
@@ -1049,8 +1049,13 @@
                             iconSrc = `https://favicon.im/${domain}`;
                         } catch(e) {}
                     }
+                    
+                    // --- 关键修复开始 ---
+                    // 将 placeholderIcon 中的双引号转义，防止破坏 HTML 结构
+                    const safePlaceholder = placeholderIcon.replace(/"/g, '&quot;');
+                    
                     const iconHtml = iconSrc 
-                        ? `<img src="${iconSrc}" onerror="this.parentElement.innerHTML='${placeholderIcon}'">` 
+                        ? `<img src="${iconSrc}" onerror="this.parentElement.innerHTML='${safePlaceholder}'">` 
                         : placeholderIcon;
 
                     const infoDiv = document.createElement('div'); infoDiv.className = 'card-info';
