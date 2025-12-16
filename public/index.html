@@ -157,7 +157,6 @@
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes scroll-left { 0% { transform: translateX(0); } 50% { transform: translateX(var(--scroll-dist)); } 55% { transform: translateX(var(--scroll-dist)); } 100% { transform: translateX(0); } }
 
-        /* 手机端布局强制修复 */
         @media (max-width: 768px) { 
             .header-container { flex-direction: column; gap: 5px; margin-bottom: 1px; }
             .separator { display: none; }
@@ -312,7 +311,11 @@
             <h3 style="color:white; margin-bottom:20px; text-align:center;">管理分类</h3>
             <div class="input-group"><label>重命名</label><input type="text" class="input-field" id="editCatName"><input type="hidden" id="editOldCatName"></div>
             <div class="input-group"><label>排序</label><div class="modal-btns" style="margin-top:0;"><button class="btn btn-move" onclick="moveCategory('up')">⬆ 上移</button><button class="btn btn-move" onclick="moveCategory('down')">⬇ 下移</button></div></div>
-            <div class="modal-btns"><button class="btn btn-cancel" onclick="closeModal('catModalOverlay')">取消</button><button class="btn btn-save" onclick="saveCategory()">保存</button></div>
+            <div class="modal-btns">
+                <button class="btn btn-cancel" onclick="closeModal('catModalOverlay')">取消</button>
+                <button class="btn" style="background:var(--error-color); color:white; flex:0.8;" onclick="handleDeleteCategory()">删除</button>
+                <button class="btn btn-save" onclick="saveCategory()">保存</button>
+            </div>
         </div>
     </div>
 
@@ -428,21 +431,17 @@
             if (section) section.classList.remove('drag-over');
         }
 
-        // === 核心修复：拖拽结束立即上传新顺序 ===
         async function handleDrop(e, targetCategory) {
             e.preventDefault();
             if (!isManageMode || !draggedItem) return;
             document.querySelectorAll('.category-section').forEach(el => el.classList.remove('drag-over'));
 
-            // 1. 读取当前屏幕上的所有卡片顺序 (DOM顺序即真理)
-            // 此时 dragging 元素已经被 insertBefore 插入到了正确位置
             const allCards = Array.from(document.querySelectorAll('.glass-card'));
             const payload = [];
-            const newSitesArray = []; // 用于同步更新本地 sites 变量
+            const newSitesArray = []; 
 
             allCards.forEach((card, index) => {
                 const id = parseInt(card.getAttribute('data-id'));
-                // 找到该卡片目前所在的分类容器
                 const section = card.closest('.category-section');
                 let category = '默认分类';
                 if (section) {
@@ -450,14 +449,12 @@
                     if (titleSpan) category = titleSpan.innerText;
                 }
                 
-                // 构造更新数据
                 payload.push({
                     id: id,
                     sort_order: index,
                     category: category
                 });
 
-                // 同步更新本地 sites 数据，防止点击齿轮时回跳
                 const originalSite = sites.find(s => s.id === id);
                 if (originalSite) {
                     originalSite.sort_order = index;
@@ -466,10 +463,8 @@
                 }
             });
 
-            // 更新全局 sites 变量，确保 renderGrid 读取的是最新顺序
             sites = newSitesArray;
 
-            // 2. 发送给后端保存
             try {
                 await fetch('/api/batch_update', {
                     method: 'POST',
@@ -479,11 +474,10 @@
             } catch (err) {
                 console.error("Drop save failed", err);
                 showMsg('保存失败，请检查网络');
-                loadSites(); // 失败则回滚
+                loadSites(); 
             }
         }
 
-        // === 核心修复：分类排序保存 ===
         async function saveCategoryOrderToRemote() {
             try {
                 await fetch('/api/category_order', {
@@ -530,7 +524,7 @@
             isManageMode = !isManageMode;
             document.body.classList.toggle('manage-mode', isManageMode);
             document.getElementById('manageBtn').classList.toggle('active', isManageMode);
-            renderGrid(); // 这里 renderGrid 此时读取的是已经被 handleDrop 更新过的 sites，所以不会回跳
+            renderGrid(); 
         }
 
         function openUserMenu() {
@@ -620,35 +614,29 @@
             existingCategories.clear(); const catList = document.getElementById('catList'); catList.innerHTML = '';
             const grouped = {};
             
-            // 1. 确保所有出现的分类都在 categoryOrder 中
             sites.forEach(site => {
                 const cat = site.category || '默认分类';
                 if (!grouped[cat]) grouped[cat] = [];
                 grouped[cat].push(site); 
                 existingCategories.add(cat);
             });
-
-            // 填充下拉列表
+            
             Array.from(existingCategories).sort().forEach(cat => { const opt = document.createElement('option'); opt.value = cat; catList.appendChild(opt); });
-
-            // **关键修复**：每次渲染前，把数据库没记录的新分类，临时加到排序列表末尾，防止它们无法被排序
+            
             const activeCats = Object.keys(grouped);
             activeCats.forEach(cat => {
                 if (!categoryOrder.includes(cat)) {
                     categoryOrder.push(cat);
                 }
             });
-            // 同时清理掉已经不存在的分类（可选，防止列表无限膨胀）
             categoryOrder = categoryOrder.filter(c => activeCats.includes(c));
 
-            // 2. 根据 categoryOrder 决定渲染顺序
             let keys = activeCats.sort((a, b) => {
                 return categoryOrder.indexOf(a) - categoryOrder.indexOf(b);
             });
 
             for (const category of keys) {
                 let items = grouped[category];
-                // 此时 items 已经是按 sort_order 排序（因为 sites 是按 sort_order 获取的）
                 
                 const section = document.createElement('div'); 
                 section.className = 'category-section';
@@ -770,7 +758,6 @@
         
         function openCatModal(name) { document.getElementById('editOldCatName').value=name; document.getElementById('editCatName').value=name; document.getElementById('catModalOverlay').classList.add('active'); }
         
-        // === 修复：分类重命名 + 立即保存排序 ===
         async function saveCategory() { 
             const o = document.getElementById('editOldCatName').value;
             const n = document.getElementById('editCatName').value;
@@ -781,34 +768,49 @@
                 if (idx !== -1) categoryOrder[idx] = n;
             } 
             
-            // 立即上传
             await saveCategoryOrderToRemote(); 
-            
             closeModal('catModalOverlay'); 
             loadSites(); 
             showMsg('分类已更新'); 
         }
         
-        // === 修复：分类排序按钮立即上传 ===
         function moveCategory(dir) { 
             const n = document.getElementById('editOldCatName').value;
             const i = categoryOrder.indexOf(n);
+            if(i === -1) return; 
             
-            if(i === -1) return; // 可能是新分类，但在 renderGrid 里已经自动加进去了，所以理论上不会-1
-            
-            // 交换位置
-            if (dir === 'up' && i > 0) {
+            if(dir === 'up' && i > 0) {
                 [categoryOrder[i], categoryOrder[i-1]] = [categoryOrder[i-1], categoryOrder[i]];
             } else if (dir === 'down' && i < categoryOrder.length - 1) {
                 [categoryOrder[i], categoryOrder[i+1]] = [categoryOrder[i+1], categoryOrder[i]];
-            } else {
-                return; // 移不动
-            }
+            } else { return; }
             
-            // 立即上传新顺序，并刷新界面
+            // 需求1：静默保存，移除 "showMsg"
             saveCategoryOrderToRemote().then(() => {
-                showMsg(dir === 'up' ? '已上移' : '已下移');
                 renderGrid(); 
+            });
+        }
+
+        // 需求2：删除分类逻辑
+        async function handleDeleteCategory() {
+            const name = document.getElementById('editOldCatName').value;
+            showConfirm(`确定删除分类 "${name}" 及其所有标签吗？此操作不可恢复！`, async () => {
+                try {
+                    // 调用后端删除接口
+                    await fetch(`/api/category_delete?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
+                    
+                    // 从本地排序列表中移除
+                    categoryOrder = categoryOrder.filter(c => c !== name);
+                    
+                    // 同步更新排序
+                    await saveCategoryOrderToRemote();
+
+                    closeModal('catModalOverlay');
+                    loadSites();
+                    showMsg('分类已删除');
+                } catch(e) {
+                    showMsg('删除失败');
+                }
             });
         }
         
