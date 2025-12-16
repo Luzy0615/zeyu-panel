@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Loading...</title> <link rel="icon" href="/logo.jpg" type="image/jpeg">
+    <title>Loading...</title>
+    <link rel="icon" href="/logo.jpg" type="image/jpeg">
     <style>
         :root { 
             --glass-bg: rgba(0, 0, 0, 0.25); 
@@ -22,8 +23,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-stack); -webkit-font-smoothing: antialiased; }
         
         body { 
-            background: url('https://t.alcy.cc/ycy') no-repeat center center fixed; 
-            background-size: cover; 
+            background-color: #222; 
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
             min-height: 100vh; 
             display: flex; flex-direction: column; align-items: center; 
             color: var(--text-primary); 
@@ -34,23 +38,13 @@
 
         .dashboard { width: 92%; max-width: 1200px; margin-top: 10vh; z-index: 1; flex: 1; }
 
-        /* 头部 */
         .header-container { display: flex; flex-direction: row; align-items: center; justify-content: center; margin-bottom: 5px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        
-        /* === 核心修复：大标题防抖动 === */
         .site-title { 
             font-size: 3.5rem; font-weight: 800; color: #fff; letter-spacing: -1px; 
             text-shadow: 0 4px 10px rgba(0,0,0,0.5); line-height: 1; margin-top: -6px;
-            /* 默认透明，防止显示默认文字 */
-            opacity: 0; 
-            transform: translateY(-10px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            opacity: 0; transform: translateY(-10px); transition: opacity 0.5s ease, transform 0.5s ease;
         }
-        /* 当数据加载完成后，JS会添加这个类，让标题淡入 */
-        .site-title.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .site-title.loaded { opacity: 1; transform: translateY(0); }
 
         .separator { width: 3px; height: 42px; background-color: rgba(255, 255, 255, 0.6); margin: 0 25px; border-radius: 2px; }
         .clock { font-size: 2.6rem; font-weight: 800; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; margin-top: -2px; }
@@ -58,7 +52,6 @@
         .subtitle-container { text-align: center; margin-bottom: 35px; animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
         .subtitle-text { display: inline-block; color: rgba(255, 255, 255, 0.95); background: transparent; border: none; text-shadow: 0 2px 15px rgba(0,0,0,0.7); font-weight: 600; letter-spacing: 1.5px; cursor: pointer; }
 
-        /* 搜索栏 */
         .search-container { position: relative; max-width: 600px; margin: 0 auto 40px; z-index: 50; animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards; }
         .search-wrapper { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); backdrop-filter: var(--glass-filter); -webkit-backdrop-filter: var(--glass-filter); border: 1px solid var(--glass-border); border-radius: 35px; padding-right: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transition: transform 0.3s, background 0.3s, box-shadow 0.3s; will-change: transform; }
         .search-wrapper:hover { transform: translateY(-4px) scale(1.01); background: rgba(0, 0, 0, 0.5); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
@@ -74,7 +67,6 @@
         .engine-option { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 14px; transition: 0.2s; }
         .engine-option:hover { background: rgba(255,255,255,0.1); }
 
-        /* 卡片与分类 */
         .category-section { margin-bottom: 35px; animation: cardEntrance 0.6s ease-out backwards; min-height: 100px; border-radius: 16px; transition: background 0.2s; }
         .category-section.drag-over { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.5); }
         .category-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; padding-left: 12px; border-left: 4px solid var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0.95; display: flex; align-items: center; justify-content: space-between; }
@@ -194,7 +186,7 @@
 <body>
     <div class="dashboard">
         <div class="header-container">
-            <div class="site-title" id="siteTitleDisplay"></div> 
+            <div class="site-title" id="siteTitleDisplay"></div>
             <div class="separator"></div>
             <div class="clock" id="clock">00:00:00</div>
         </div>
@@ -231,7 +223,7 @@
 
     <div class="fab-container">
         <button class="fab-btn secondary" onclick="toggleEditMode()" id="manageBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
         <button class="fab-btn secondary" onclick="openUserMenu()" id="userBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -361,6 +353,13 @@
             <h3 id="modalTitle" style="color:white; margin-bottom:20px; text-align:center;">添加网站</h3>
             <div class="input-group"><label>分类</label><input type="text" class="input-field" id="siteCategory" list="catList" placeholder="输入或选择分类"> <datalist id="catList"></datalist></div>
             <div class="input-group"><label>链接</label><div class="url-input-wrapper"><input type="text" class="input-field" id="siteUrl" placeholder="https://example.com"><button class="btn-get" id="btnGetInfo" onclick="fetchSiteInfo()">获取</button></div></div>
+            <div class="input-group">
+                <label>打开方式</label>
+                <select class="input-field" id="siteTarget">
+                    <option value="_self">从当前页打开</option>
+                    <option value="_blank">在新标签页打开</option>
+                </select>
+            </div>
             <div class="input-group"><label>标题</label><input type="text" class="input-field" id="siteTitle" placeholder="例如: 必应"></div>
             <div class="input-group"><label>描述</label><input type="text" class="input-field" id="siteDesc" placeholder="简短描述"></div>
             <div class="input-group"><label>图标</label>
@@ -559,7 +558,7 @@
             } catch(e) { console.error('Category order save failed', e); }
         }
 
-        // === 核心逻辑修改：loadConfig 负责淡入标题 ===
+        // === 核心修复：防抖动加载 ===
         async function loadConfig() {
             try {
                 // 背景
@@ -572,19 +571,17 @@
                     document.body.style.backgroundImage = `url('${defaultBg}')`;
                 }
 
-                // 标题
+                // 标题 (静默替换 + 淡入)
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
                 
-                // 设置标题
                 document.title = title;
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = title;
-                document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
+                titleEl.classList.add('loaded'); // 添加 loaded 类，触发淡入动画
                 
-                // 淡入显示
-                titleEl.classList.add('loaded');
+                document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
                 // 页脚
                 const footerRes = await fetch('/api/config?key=site_footer');
@@ -597,8 +594,8 @@
                 const catRes = await fetch('/api/category_order');
                 if(catRes.ok) categoryOrder = await catRes.json();
             } catch(e) { 
-                console.error('Config load error', e); 
-                // 即使出错也要显示标题
+                console.error('Config load error', e);
+                // 出错也显示默认标题
                 const titleEl = document.getElementById('siteTitleDisplay');
                 titleEl.innerText = 'Zeyu Panel';
                 titleEl.classList.add('loaded');
@@ -897,7 +894,8 @@
 
                     card.onclick = () => { 
                         if(isManageMode) return; 
-                        window.open(site.url, '_blank'); 
+                        const target = site.target || '_self';
+                        window.open(site.url, target);
                     };
                     
                     const originalIndex = sites.findIndex(s => s.id === site.id);
@@ -927,8 +925,18 @@
         function openAddModal() { openModal(false); }
         function openModal(editMode=false, data=null) {
             isEditing = editMode; document.getElementById('modalOverlay').classList.add('active');
-            if(editMode && data) { editId = data.id; document.getElementById('siteTitle').value = data.title; document.getElementById('siteUrl').value = data.url; document.getElementById('siteDesc').value = data.desc; document.getElementById('siteIcon').value = data.icon; document.getElementById('siteCategory').value = data.category; } 
-            else { ['siteTitle','siteUrl','siteDesc','siteIcon','siteCategory'].forEach(id=>document.getElementById(id).value=''); }
+            if(editMode && data) { 
+                editId = data.id; 
+                document.getElementById('siteTitle').value = data.title; 
+                document.getElementById('siteUrl').value = data.url; 
+                document.getElementById('siteDesc').value = data.desc; 
+                document.getElementById('siteIcon').value = data.icon; 
+                document.getElementById('siteCategory').value = data.category;
+                document.getElementById('siteTarget').value = data.target || '_self';
+            } else { 
+                ['siteTitle','siteUrl','siteDesc','siteIcon','siteCategory'].forEach(id=>document.getElementById(id).value=''); 
+                document.getElementById('siteTarget').value = '_self';
+            }
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
@@ -966,7 +974,8 @@
                 url: document.getElementById('siteUrl').value, 
                 desc: document.getElementById('siteDesc').value, 
                 icon: document.getElementById('siteIcon').value, 
-                category: document.getElementById('siteCategory').value || '默认分类'
+                category: document.getElementById('siteCategory').value || '默认分类',
+                target: document.getElementById('siteTarget').value
             }; 
             if(!payload.title || !payload.url) return showMsg('必填'); 
             
