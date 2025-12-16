@@ -233,7 +233,7 @@
     <div class="modal-overlay" id="loginModalOverlay">
         <div class="modal">
             <div class="login-form-view" id="loginFormView" style="width:100%">
-                <h3 style="color:white; margin-bottom:20px; text-align:center;">用户登录</h3>
+                <h3 style="color:white; margin-bottom:20px; text-align:center;">管理员登录</h3>
                 <div class="input-group"><label>用户名</label><input type="text" class="input-field" id="loginUser"></div>
                 <div class="input-group"><label>密码</label><input type="password" class="input-field" id="loginPass"></div>
                 <div class="modal-btns">
@@ -543,6 +543,7 @@
 
         async function loadConfig() {
             try {
+                // 背景
                 const bgRes = await fetch('/api/config?key=background_api');
                 const bgData = await bgRes.json();
                 if (bgData && bgData.value) {
@@ -550,6 +551,7 @@
                     document.getElementById('bgApiInput').value = bgData.value;
                 }
 
+                // 标题
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
@@ -557,6 +559,7 @@
                 document.getElementById('siteTitleDisplay').innerText = title;
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
+                // 页脚
                 const footerRes = await fetch('/api/config?key=site_footer');
                 const footerData = await footerRes.json();
                 const footerText = (footerData && footerData.value) ? footerData.value : '';
@@ -757,18 +760,24 @@
                 let html = `<table class="user-list"><tr><th>用户</th><th>角色</th><th>权限</th><th>操作</th></tr>`;
                 users.forEach(u => {
                     const isGuest = u.role === 'guest';
-                    const permBtn = isGuest 
+                    const permBtn = (isGuest || u.username === 'guest')
                         ? `<button onclick='openPermModal(${u.id}, ${JSON.stringify(u.allowed_categories || [])})' style='background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:2px 6px;border-radius:4px;cursor:pointer;'>⚙️ 设置</button>` 
                         : `<span style='color:#666'>-</span>`;
                     
-                    html += `<tr>
-                        <td>${u.username}</td>
-                        <td>
-                            <select class="user-role-select" id="role-${u.id}" onchange="updateUserRole(${u.id})">
+                    // 隐藏 'guest' 用户的角色切换，防止误操作
+                    let roleSelect = '';
+                    if (u.username === 'guest') {
+                        roleSelect = `<span style="color:#aaa; font-size:12px;">全局访客</span>`;
+                    } else {
+                        roleSelect = `<select class="user-role-select" id="role-${u.id}" onchange="updateUserRole(${u.id})">
                                 <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
                                 <option value="guest" ${u.role==='guest'?'selected':''}>Guest</option>
-                            </select>
-                        </td>
+                            </select>`;
+                    }
+
+                    html += `<tr>
+                        <td>${u.username}</td>
+                        <td>${roleSelect}</td>
                         <td>${permBtn}</td>
                         <td><button onclick="updateUserRole(${u.id})">💾</button></td>
                     </tr>`;
@@ -779,9 +788,16 @@
         }
 
         async function updateUserRole(id) {
-            const newRole = document.getElementById(`role-${id}`).value;
-            await fetch('/api/users', { method: 'PUT', body: JSON.stringify({ id, newRole }) });
-            showMsg('权限已更新');
+            // 如果是 guest 用户，没有 role select，不需要更新 role
+            const roleSelect = document.getElementById(`role-${id}`);
+            let body = { id };
+            
+            if (roleSelect) {
+                body.newRole = roleSelect.value;
+            }
+            
+            await fetch('/api/users', { method: 'PUT', body: JSON.stringify(body) });
+            showMsg('已保存');
             loadUserList();
         }
 
@@ -795,6 +811,7 @@
                 if (currentUserRole === 'guest' && currentUserAllowedCats.length > 0) {
                     if (!currentUserAllowedCats.includes(cat)) return;
                 } else if (currentUserRole === 'guest' && currentUserAllowedCats.length === 0) {
+                    // 如果访客没有配置任何允许分类，则不显示内容
                     return; 
                 }
 
