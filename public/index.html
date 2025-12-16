@@ -23,8 +23,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-stack); -webkit-font-smoothing: antialiased; }
         
         body { 
-            background: url('https://t.alcy.cc/ycy') no-repeat center center fixed; 
-            background-size: cover; 
+            /* 需求：CSS中不再硬编码图片，改为纯色背景，由JS决定加载哪张图 */
+            background-color: #222; 
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+            
             min-height: 100vh; 
             display: flex; flex-direction: column; align-items: center; 
             color: var(--text-primary); 
@@ -378,6 +383,7 @@
             bilibili: { name: 'Bilibili', url: 'https://search.bilibili.com/all?keyword=', icon: 'https://www.bilibili.com/favicon.ico' }
         };
         const placeholderIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
+        const defaultBg = 'https://t.alcy.cc/ycy';
         
         let currentEngine = localStorage.getItem('myEngine') || 'bing';
         let isManageMode = false;
@@ -543,15 +549,15 @@
 
         async function loadConfig() {
             try {
-                // 背景
                 const bgRes = await fetch('/api/config?key=background_api');
                 const bgData = await bgRes.json();
                 if (bgData && bgData.value) {
                     document.body.style.backgroundImage = `url('${bgData.value}')`;
                     document.getElementById('bgApiInput').value = bgData.value;
+                } else {
+                    document.body.style.backgroundImage = `url('${defaultBg}')`;
                 }
 
-                // 标题
                 const titleRes = await fetch('/api/config?key=site_title');
                 const titleData = await titleRes.json();
                 const title = (titleData && titleData.value) ? titleData.value : 'Zeyu Panel';
@@ -559,7 +565,6 @@
                 document.getElementById('siteTitleDisplay').innerText = title;
                 document.getElementById('siteNameInput').value = (titleData && titleData.value) ? titleData.value : '';
 
-                // 页脚
                 const footerRes = await fetch('/api/config?key=site_footer');
                 const footerData = await footerRes.json();
                 const footerText = (footerData && footerData.value) ? footerData.value : '';
@@ -764,7 +769,6 @@
                         ? `<button onclick='openPermModal(${u.id}, ${JSON.stringify(u.allowed_categories || [])})' style='background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:2px 6px;border-radius:4px;cursor:pointer;'>⚙️ 设置</button>` 
                         : `<span style='color:#666'>-</span>`;
                     
-                    // 隐藏 'guest' 用户的角色切换，防止误操作
                     let roleSelect = '';
                     if (u.username === 'guest') {
                         roleSelect = `<span style="color:#aaa; font-size:12px;">全局访客</span>`;
@@ -788,14 +792,11 @@
         }
 
         async function updateUserRole(id) {
-            // 如果是 guest 用户，没有 role select，不需要更新 role
             const roleSelect = document.getElementById(`role-${id}`);
             let body = { id };
-            
             if (roleSelect) {
                 body.newRole = roleSelect.value;
             }
-            
             await fetch('/api/users', { method: 'PUT', body: JSON.stringify(body) });
             showMsg('已保存');
             loadUserList();
@@ -811,7 +812,6 @@
                 if (currentUserRole === 'guest' && currentUserAllowedCats.length > 0) {
                     if (!currentUserAllowedCats.includes(cat)) return;
                 } else if (currentUserRole === 'guest' && currentUserAllowedCats.length === 0) {
-                    // 如果访客没有配置任何允许分类，则不显示内容
                     return; 
                 }
 
